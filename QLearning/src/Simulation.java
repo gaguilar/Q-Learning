@@ -87,12 +87,12 @@ public class Simulation {
 			if (state.agentRow < 5)
 				state.agentRow += 1;
 		} else if (entry.movingEast()) {
-			if (state.agentCol > 1) {
-				state.agentCol -= 1;
+			if (state.agentCol < 5) {
+				state.agentCol += 1;
 			}
 		} else if (entry.movingWest()) {
-			if (state.agentCol < 5)
-				state.agentCol += 1;
+			if (state.agentCol > 1)
+				state.agentCol -= 1;
 		} else if (entry.droppingOff()) {
 			if (goodDropOff(state))
 				state.hasBlock = 0;
@@ -123,6 +123,7 @@ public class Simulation {
 		for (int i = 0; i < maxSteps; i++) {
 			State state = new State(currentState.agentRow, currentState.agentCol, currentState.hasBlock);
 			QEntry e = policy(state);
+                        System.out.println(e);
                         updateQTable(e);
                         State nextState = applyMove(e);
                         currentState.agentRow = nextState.agentRow;
@@ -149,13 +150,14 @@ public class Simulation {
 		} else {
 			// do highest utility
 			QEntry choice = null;
-			double bestUtility = Double.MIN_VALUE;
+			double bestUtility = Integer.MIN_VALUE;
 			for (QEntry e : validMoves) {
-				double thisUtility = getUtility(e);
-				if(thisUtility > bestUtility){
-					bestUtility = thisUtility;
-					choice = e;
-				}
+                            double thisUtility = getUtility(e);
+                            if(thisUtility > bestUtility){
+                                
+                                    bestUtility = thisUtility;
+                                    choice = e;
+                            }
 			}
 			return choice;
 		}
@@ -183,18 +185,15 @@ public class Simulation {
 			moves.add(QEntry.PickUp(state));
 		if (goodDropOff(state))
 			moves.add(QEntry.DropOff(state));
-                System.out.println("Valid moves for state: "+state.toString());
-                for(QEntry e:moves)
-                    System.out.println(e);
 		return moves;
 	}
 
 	public static void main(String[] args) {
-		double alpha = .5;//Double.parseDouble(args[0]);
-		double gamma = .5;//Double.parseDouble(args[1]);
-		double randomChoice = 1;//Double.parseDouble(args[2]);
+		double alpha = .9;//Double.parseDouble(args[0]);
+		double gamma = .1;//Double.parseDouble(args[1]);
+		double randomChoice = .35;//Double.parseDouble(args[2]);
 		Simulation sim = new Simulation(alpha, gamma, randomChoice);
-		sim.simulate(2);
-		sim.printQTable();
+		sim.simulate(10);
+		//sim.printQTable();
 	}
 }

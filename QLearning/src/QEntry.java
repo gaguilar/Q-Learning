@@ -76,6 +76,14 @@ public class QEntry{
 	public boolean droppingOff(){
 		return a == Action.DROPOFF;
 	}
+        
+        @Override
+        public boolean equals(Object o1)
+        {
+            QEntry e1 = (QEntry) o1;
+            
+            return this.toString().equals(e1.toString());
+        }
 
 	public String toString() {
 		return new String(s.toString()+ " " + a);
