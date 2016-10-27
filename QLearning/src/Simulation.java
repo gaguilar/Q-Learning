@@ -15,25 +15,28 @@ public class Simulation {
 
 	HashMap<QEntry, Double> qtable;
 	double alpha, gamma;
+	double randomChance;
 
 	FullState currentState;
 
-	public Simulation(double learningRate, double discountRate) {
+	public Simulation(double learningRate, double discountRate, double randomChoice) {
 		alpha = learningRate;
 		gamma = discountRate;
+		this.randomChance = randomChoice;
 		qtable = new HashMap<QEntry, Double>();
 		currentState = new FullState(1, 5, 0, 5, 5, 5, 0, 0, 0);
 	}
 
 	/*
 	 * qtable(qentry) = immediate reward for taking action 'a' while in state
-	 * 's' + gamma (or ralitve value of delayed vs. immediate rewards) * max
-	 * qtable(qentry) for all moves after taking action 'a'
+	 * 's' + gamma (or ralitve value of delayed vs. immediate rewards) *
+	 * maxqtable(qentry) for all moves after taking action 'a'
 	 */
 	public void updateQTable(QEntry entry) {
-		 double oldUtility = getUtility(entry); 
-		 double newUtility = (1 - alpha) * oldUtility + alpha * (entry.getImmediateReward() + gamma * getMaxUtilityNextMove(applyMove(entry))); 
-		 qtable.put(entry, newUtility);
+		double oldUtility = getUtility(entry);
+		double newUtility = (1 - alpha) * oldUtility
+				+ alpha * (entry.getImmediateReward() + gamma * getMaxUtilityNextMove(applyMove(entry)));
+		qtable.put(entry, newUtility);
 	}
 
 	// Q(s, a) look up Q value for being in some state and taking some action.
@@ -45,17 +48,13 @@ public class Simulation {
 	}
 
 	public double getMaxUtilityNextMove(State state) {
-		ArrayList<Double> futureUtilityList = new ArrayList<Double>();
-		int row = state.agentRow;
-		int col = state.agentCol;
-		if (row > 1) futureUtilityList.add(getUtility(QEntry.MoveNorth(state)));
-		if (row < 5) futureUtilityList.add(getUtility(QEntry.MoveSouth(state)));
-		if (col > 1) futureUtilityList.add(getUtility(QEntry.MoveEast(state)));
-		if (col < 5) futureUtilityList.add(getUtility(QEntry.MoveWest(state)));
-		if (goodPickUp(state)) futureUtilityList.add(getUtility(QEntry.PickUp(state)));
-		if (goodDropOff(state)) futureUtilityList.add(getUtility(QEntry.DropOff(state)));
-		Collections.sort(futureUtilityList);
-		return futureUtilityList.get(futureUtilityList.size() - 1);
+		ArrayList<QEntry> futureMoves = getValidMoves(state);
+		double bestUtility = Double.MIN_VALUE;
+		for (QEntry e : futureMoves) {
+			if (getUtility(e) > bestUtility)
+				bestUtility = getUtility(e);
+		}
+		return bestUtility;
 	}
 
 	public State applyMove(QEntry entry) {
@@ -89,7 +88,7 @@ public class Simulation {
 	}
 
 	public boolean goodDropOff(State state) {
-		return agentInBounds(state) && state.hasBlock == 0
+		return agentInBounds(state) && state.hasBlock == 1
 				&& board[state.agentRow - 1][state.agentCol - 1] == Occupant.DropOff;
 	}
 
@@ -101,18 +100,63 @@ public class Simulation {
 
 	public void simulate(int maxSteps) {
 		for (int i = 0; i < maxSteps; i++) {
-
+			State state = new State(currentState.agentRow, currentState.agentCol, currentState.hasBlock);
+			QEntry e = policy(state);
 		}
 	}
-	
-	public void printQTable(){
-		for(QEntry e : qtable.keySet()){
+
+	public QEntry policy(State state) {
+		ArrayList<QEntry> validMoves = getValidMoves(state);
+		double roll = Math.random();
+		if(roll <= randomChance){
+			// do random
+			Collections.shuffle(validMoves);
+			return validMoves.get(0);
+		} else {
+			// do highest utility
+			QEntry choice = null;
+			double bestUtility = Double.MIN_VALUE;
+			for (QEntry e : validMoves) {
+				double thisUtility = getUtility(e);
+				if(thisUtility > bestUtility){
+					bestUtility = thisUtility;
+					choice = e;
+				}
+			}
+			return choice;
+		}
+	}
+
+	public void printQTable() {
+		for (QEntry e : qtable.keySet()) {
 			System.out.println(qtable.get(e));
 		}
 	}
 
+	public ArrayList<QEntry> getValidMoves(State state) {
+		ArrayList<QEntry> moves = new ArrayList<QEntry>();
+		int row = state.agentRow;
+		int col = state.agentCol;
+		if (row > 1)
+			moves.add(QEntry.MoveNorth(state));
+		if (row < 5)
+			moves.add(QEntry.MoveSouth(state));
+		if (col > 1)
+			moves.add(QEntry.MoveEast(state));
+		if (col < 5)
+			moves.add(QEntry.MoveWest(state));
+		if (goodPickUp(state))
+			moves.add(QEntry.PickUp(state));
+		if (goodDropOff(state))
+			moves.add(QEntry.DropOff(state));
+		return moves;
+	}
+
 	public static void main(String[] args) {
-		Simulation sim = new Simulation(0.9, 0.1);
+		double alpha = Double.parseDouble(args[0]);
+		double gamma = Double.parseDouble(args[1]);
+		double randomChoice = Double.parseDouble(args[2]);
+		Simulation sim = new Simulation(alpha, gamma, randomChoice);
 		sim.simulate(1);
 		sim.printQTable();
 	}

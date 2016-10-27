@@ -1,4 +1,4 @@
-public class QEntry {
+public class QEntry{
 
 	public enum Action {
 		NORTH, SOUTH, EAST, WEST, PICKUP, DROPOFF
@@ -80,4 +80,5 @@ public class QEntry {
 	public String toString() {
 		return new String(s.toString() + a);
 	}
+
 }
