@@ -52,6 +52,30 @@ public class QEntry {
 		State newState = s.clone();
 		return new QEntry(newState, Action.PICKUP);
 	}
+	
+	public boolean movingNorth(){
+		return a == Action.NORTH;
+	}
+	
+	public boolean movingSouth(){
+		return a == Action.SOUTH;
+	}
+	
+	public boolean movingWest(){
+		return a == Action.WEST;
+	}
+	
+	public boolean movingEast(){
+		return a == Action.EAST;
+	}
+	
+	public boolean pickingUp(){
+		return a == Action.PICKUP;
+	}
+	
+	public boolean droppingOff(){
+		return a == Action.DROPOFF;
+	}
 
 	public String toString() {
 		return new String(s.toString() + a);
