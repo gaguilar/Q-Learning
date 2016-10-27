@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Hashtable;
 
 public class Simulation {
 	public static enum Occupant {
@@ -13,7 +14,7 @@ public class Simulation {
 			{ Occupant.Empty, Occupant.Empty, Occupant.Empty, Occupant.Empty, Occupant.Empty },
 			{ Occupant.DropOff, Occupant.Empty, Occupant.DropOff, Occupant.Empty, Occupant.PickUp } };
 
-	HashMap<QEntry, Double> qtable;
+	Hashtable<QEntry, Double> qtable;
 	double alpha, gamma;
 	double randomChance;
 
@@ -23,7 +24,7 @@ public class Simulation {
 		alpha = learningRate;
 		gamma = discountRate;
 		this.randomChance = randomChoice;
-		qtable = new HashMap<QEntry, Double>();
+		qtable = new Hashtable<QEntry, Double>();
 		currentState = new FullState(1, 5, 0, 5, 5, 5, 0, 0, 0);
 	}
 
@@ -123,7 +124,7 @@ public class Simulation {
 		for (int i = 0; i < maxSteps; i++) {
 			State state = new State(currentState.agentRow, currentState.agentCol, currentState.hasBlock);
 			QEntry e = policy(state);
-                        System.out.println(e);
+//                        System.out.println(e);
                         updateQTable(e);
                         State nextState = applyMove(e);
                         currentState.agentRow = nextState.agentRow;
@@ -189,11 +190,23 @@ public class Simulation {
 	}
 
 	public static void main(String[] args) {
+            
 		double alpha = .9;//Double.parseDouble(args[0]);
 		double gamma = .1;//Double.parseDouble(args[1]);
 		double randomChoice = .35;//Double.parseDouble(args[2]);
 		Simulation sim = new Simulation(alpha, gamma, randomChoice);
 		sim.simulate(10);
-		//sim.printQTable();
+		sim.printQTable();
+                    
+//            Hashtable<String, Double> table = new Hashtable();
+//            QEntry e1 = QEntry.MoveSouth(new State(1,5,0));
+//            QEntry e2 = QEntry.MoveSouth(new State(1,5,0));
+//            System.out.println(e1.equals(e2));
+//            table.put(e1.toString(), -0.9);
+//            System.out.println(table.size());
+//            table.put(e2.toString(), 100.0);
+//            System.out.println(table.size());
+//            for(String e:table.keySet())
+//                System.out.println(e + " " + table.get(e));
 	}
 }

@@ -1,4 +1,5 @@
-public class QEntry{
+public class QEntry
+{
 
 	public enum Action {
 		NORTH, SOUTH, EAST, WEST, PICKUP, DROPOFF
@@ -83,6 +84,12 @@ public class QEntry{
             QEntry e1 = (QEntry) o1;
             
             return this.toString().equals(e1.toString());
+        }
+        
+        @Override
+        public int hashCode()
+        {
+            return toString().hashCode();
         }
 
 	public String toString() {
