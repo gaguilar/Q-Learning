@@ -78,7 +78,7 @@ public class QEntry{
 	}
 
 	public String toString() {
-		return new String(s.toString() + a);
+		return new String(s.toString()+ " " + a);
 	}
 
 }

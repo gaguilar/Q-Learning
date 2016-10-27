@@ -145,7 +145,7 @@ public class Simulation {
 
 	public void printQTable() {
 		for (QEntry e : qtable.keySet()) {
-			System.out.println(qtable.get(e));
+			System.out.println(e+" "+qtable.get(e));
 		}
 	}
 
