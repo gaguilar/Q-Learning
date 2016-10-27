@@ -102,13 +102,29 @@ public class Simulation {
 		for (int i = 0; i < maxSteps; i++) {
 			State state = new State(currentState.agentRow, currentState.agentCol, currentState.hasBlock);
 			QEntry e = policy(state);
+                        updateQTable(e);
+                        State nextState = applyMove(e);
+                        currentState.agentRow = nextState.agentRow;
+                        currentState.agentCol = nextState.agentCol;
+                        currentState.hasBlock = nextState.hasBlock;
 		}
 	}
 
 	public QEntry policy(State state) {
 		ArrayList<QEntry> validMoves = getValidMoves(state);
 		double roll = Math.random();
-		if(roll <= randomChance){
+                
+                // Give priority to dropoff and pickup locations
+                for (QEntry e : validMoves) {
+                        if (currentState.hasBlock == 1 && goodDropOff(e.s)) {
+                                return e;
+                        }
+                        if (currentState.hasBlock == 0 && goodPickUp(e.s)) {
+                                return e;
+                        }
+                }
+		
+                if(roll <= randomChance){
 			// do random
 			Collections.shuffle(validMoves);
 			return validMoves.get(0);
