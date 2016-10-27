@@ -37,6 +37,27 @@ public class Simulation {
 		double newUtility = (1 - alpha) * oldUtility
 				+ alpha * (entry.getImmediateReward() + gamma * getMaxUtilityNextMove(applyMove(entry)));
 		qtable.put(entry, newUtility);
+                
+                // update current state pickup/dropoff location counts
+                State s = entry.s;
+                switch (entry.a) {
+                    case PICKUP:
+                        if (s.agentRow == 1 && s.agentCol == 1)
+                           currentState.p1--;
+                        else if (s.agentRow == 3 && s.agentCol == 3)
+                           currentState.p2--;
+                        else if (s.agentRow == 5 && s.agentCol == 5)
+                           currentState.p3--;
+
+                        break;
+                    case DROPOFF:
+                        if (s.agentRow == 5 && s.agentCol == 1)
+                           currentState.d1++;
+                        else if (s.agentRow == 5 && s.agentCol == 3)
+                           currentState.d2++;
+                        else if (s.agentRow == 2 && s.agentCol == 5)
+                           currentState.d3++;
+		}
 	}
 
 	// Q(s, a) look up Q value for being in some state and taking some action.
