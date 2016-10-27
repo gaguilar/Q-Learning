@@ -132,18 +132,15 @@ public class Simulation {
 	}
 
 	public QEntry policy(State state) {
+                // Give priority to dropoff and pickup locations
+                if (goodDropOff(state)) {
+                        return QEntry.DropOff(state);
+                } else if (goodPickUp(state)) {
+                        return QEntry.PickUp(state);
+                }
+                
 		ArrayList<QEntry> validMoves = getValidMoves(state);
 		double roll = Math.random();
-                
-                // Give priority to dropoff and pickup locations
-                for (QEntry e : validMoves) {
-                        if (currentState.hasBlock == 1 && goodDropOff(e.s)) {
-                                return e;
-                        }
-                        if (currentState.hasBlock == 0 && goodPickUp(e.s)) {
-                                return e;
-                        }
-                }
 		
                 if(roll <= randomChance){
 			// do random
@@ -179,22 +176,25 @@ public class Simulation {
 		if (row < 5)
 			moves.add(QEntry.MoveSouth(state));
 		if (col > 1)
-			moves.add(QEntry.MoveEast(state));
-		if (col < 5)
 			moves.add(QEntry.MoveWest(state));
+		if (col < 5)
+			moves.add(QEntry.MoveEast(state));
 		if (goodPickUp(state))
 			moves.add(QEntry.PickUp(state));
 		if (goodDropOff(state))
 			moves.add(QEntry.DropOff(state));
+                System.out.println("Valid moves for state: "+state.toString());
+                for(QEntry e:moves)
+                    System.out.println(e);
 		return moves;
 	}
 
 	public static void main(String[] args) {
-		double alpha = Double.parseDouble(args[0]);
-		double gamma = Double.parseDouble(args[1]);
-		double randomChoice = Double.parseDouble(args[2]);
+		double alpha = .5;//Double.parseDouble(args[0]);
+		double gamma = .5;//Double.parseDouble(args[1]);
+		double randomChoice = 1;//Double.parseDouble(args[2]);
 		Simulation sim = new Simulation(alpha, gamma, randomChoice);
-		sim.simulate(1);
+		sim.simulate(2);
 		sim.printQTable();
 	}
 }
