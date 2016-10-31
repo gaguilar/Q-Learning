@@ -130,6 +130,12 @@ public class Simulation {
                         currentState.agentRow = nextState.agentRow;
                         currentState.agentCol = nextState.agentCol;
                         currentState.hasBlock = nextState.hasBlock;
+                        
+                        if(currentState.isGoalState())
+                        {
+                            System.out.println("GOAL STATE REACHED AT ITERATION " + i);
+                            return;
+                        }
 		}
 	}
 
@@ -204,9 +210,9 @@ public class Simulation {
 		double gamma = .3; // Discount factor
 		double randomChoice = .35;//Double.parseDouble(args[2]);
 		Simulation sim = new Simulation(alpha, gamma, randomChoice);
-		sim.simulate(10000);
+		sim.simulate(100000);
 		sim.printQTable();
-                    
+                sim.currentState.printFullState();
                 /*
                 NOTES FROM CLASS
                 
