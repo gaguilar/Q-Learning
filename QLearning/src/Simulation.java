@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 
 public class Simulation {
 	public static enum Occupant {
@@ -165,9 +165,18 @@ public class Simulation {
 	}
 
 	public void printQTable() {
-		for (QEntry e : qtable.keySet()) {
-			System.out.println(e+" "+qtable.get(e));
-		}
+//		for (QEntry e : qtable.keySet()) {
+//			System.out.println(e+" "+qtable.get(e));
+//		}
+
+                List<QEntry> entries = new ArrayList(qtable.keySet());
+                entries
+                    .stream()
+                    .filter((qe) -> qtable.get(qe) != 0.0) // Reducing noise
+                    .sorted((qe1, qe2) -> qe1.compareByCol(qe2))
+                    .sorted((qe1, qe2) -> qe1.compareByRow(qe2))
+                    .sorted((qe1, qe2) -> qe1.compareByBlock(qe2))
+                    .forEach((e) -> System.out.println(e + " " + qtable.get(e)));
 	}
 
 	public ArrayList<QEntry> getValidMoves(State state) {
@@ -191,13 +200,24 @@ public class Simulation {
 
 	public static void main(String[] args) {
             
-		double alpha = .9;//Double.parseDouble(args[0]);
-		double gamma = .1;//Double.parseDouble(args[1]);
+		double alpha = .5; // Learning rate
+		double gamma = .3; // Discount factor
 		double randomChoice = .35;//Double.parseDouble(args[2]);
 		Simulation sim = new Simulation(alpha, gamma, randomChoice);
-		sim.simulate(10);
+		sim.simulate(10000);
 		sim.printQTable();
                     
+                /*
+                NOTES FROM CLASS
+                
+                * Do not use the whole state space, it will never learn anything —or at least it will take too long to do it
+                * Reduce the State space to the Reinforcement Learning space (either 1 or 2 options)
+                
+                State Space 1: <-- Which is our case..
+                * Position of the agent and if it carries a block
+                * Totally ignores how many blocks are in both pickup/dropoff locations
+                */
+                
 //            Hashtable<String, Double> table = new Hashtable();
 //            QEntry e1 = QEntry.MoveSouth(new State(1,5,0));
 //            QEntry e2 = QEntry.MoveSouth(new State(1,5,0));
