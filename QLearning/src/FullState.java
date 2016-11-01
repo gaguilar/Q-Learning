@@ -15,13 +15,13 @@ public class FullState extends State {
 	}
 
 	public boolean isGoalState() {
-                // TODO: We need to take care of empty pickup and full dropoff locations
-		return (hasBlock==0 && p1 <= 0 && p2 <= 0 && p3 <= 0 && d1 >= 5 && d2 >= 5 && d3 >= 5);
+		// TODO: We need to take care of empty pickup and full dropoff locations
+		return (hasBlock == 0 && p1 == 0 && p2 == 0 && p3 == 0 && d1 == 5 && d2 == 5 && d3 == 5);
 	}
-        
-        public void printFullState()
-        {
-            String output = String.format("FullState(%d,%d, %d, %d,%d,%d, %d,%d,%d)", agentRow, agentCol, hasBlock, p1, p2, p3, d1, d2, d3);
-            System.out.println(output);
-        }
+
+	public void printFullState() {
+		String output = String.format("FullState(%d,%d, %d, %d,%d,%d, %d,%d,%d)", agentRow, agentCol, hasBlock, p1, p2,
+				p3, d1, d2, d3);
+		System.out.println(output);
+	}
 }

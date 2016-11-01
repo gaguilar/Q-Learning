@@ -38,26 +38,43 @@ public class Simulation {
 		double newUtility = (1 - alpha) * oldUtility
 				+ alpha * (entry.getImmediateReward() + gamma * getMaxUtilityNextMove(applyMove(entry)));
 		qtable.put(entry, newUtility);
-                
-                // update current state pickup/dropoff location counts
-                State s = entry.s;
-                switch (entry.a) {
-                    case PICKUP:
-                        if (s.agentRow == 1 && s.agentCol == 1)
-                           currentState.p1--;
-                        else if (s.agentRow == 3 && s.agentCol == 3)
-                           currentState.p2--;
-                        else if (s.agentRow == 5 && s.agentCol == 5)
-                           currentState.p3--;
 
-                        break;
-                    case DROPOFF:
-                        if (s.agentRow == 5 && s.agentCol == 1)
-                           currentState.d1++;
-                        else if (s.agentRow == 5 && s.agentCol == 3)
-                           currentState.d2++;
-                        else if (s.agentRow == 2 && s.agentCol == 5)
-                           currentState.d3++;
+	}
+
+	public void updatePickupDropoffLocations(QEntry entry) {
+		// update current state pickup/dropoff location counts
+		State s = entry.s;
+		switch (entry.a) {
+		case PICKUP:
+			if (s.agentRow == 1 && s.agentCol == 1) {
+				currentState.p1--;
+				if(currentState.p1 == 0)
+					board[0][0] = Occupant.Empty;
+			} else if (s.agentRow == 3 && s.agentCol == 3) {
+				currentState.p2--;
+				if(currentState.p2 == 0)
+					board[2][2] = Occupant.Empty;
+			} else if (s.agentRow == 5 && s.agentCol == 5) {
+				currentState.p3--;
+				if(currentState.p1 == 0)
+					board[4][4] = Occupant.Empty;
+			}
+
+			break;
+		case DROPOFF:
+			if (s.agentRow == 5 && s.agentCol == 1) {
+				currentState.d1++;
+				if(currentState.d1 == 5)
+					board[4][0] = Occupant.Empty;
+			} else if (s.agentRow == 5 && s.agentCol == 3) {
+				currentState.d2++;
+				if(currentState.d2 == 5)
+					board[4][2] = Occupant.Empty;
+			} else if (s.agentRow == 2 && s.agentCol == 5) {
+				currentState.d3++;
+				if(currentState.d3 == 5)
+					board[1][4] = Occupant.Empty;
+			}
 		}
 	}
 
@@ -124,33 +141,32 @@ public class Simulation {
 		for (int i = 0; i < maxSteps; i++) {
 			State state = new State(currentState.agentRow, currentState.agentCol, currentState.hasBlock);
 			QEntry e = policy(state);
-//                        System.out.println(e);
-                        updateQTable(e);
-                        State nextState = applyMove(e);
-                        currentState.agentRow = nextState.agentRow;
-                        currentState.agentCol = nextState.agentCol;
-                        currentState.hasBlock = nextState.hasBlock;
-                        
-                        if(currentState.isGoalState())
-                        {
-                            System.out.println("GOAL STATE REACHED AT ITERATION " + i);
-                            return;
-                        }
+			updateQTable(e);
+			updatePickupDropoffLocations(e);
+			State nextState = applyMove(e);
+			currentState.agentRow = nextState.agentRow;
+			currentState.agentCol = nextState.agentCol;
+			currentState.hasBlock = nextState.hasBlock;
+
+			if (currentState.isGoalState()) {
+				System.out.println("GOAL STATE REACHED AT ITERATION " + i);
+				return;
+			}
 		}
 	}
 
 	public QEntry policy(State state) {
-                // Give priority to dropoff and pickup locations
-                if (goodDropOff(state)) {
-                        return QEntry.DropOff(state);
-                } else if (goodPickUp(state)) {
-                        return QEntry.PickUp(state);
-                }
-                
+		// Give priority to dropoff and pickup locations
+		if (goodDropOff(state)) {
+			return QEntry.DropOff(state);
+		} else if (goodPickUp(state)) {
+			return QEntry.PickUp(state);
+		}
+
 		ArrayList<QEntry> validMoves = getValidMoves(state);
 		double roll = Math.random();
-		
-                if(roll <= randomChance){
+
+		if (roll <= randomChance) {
 			// do random
 			Collections.shuffle(validMoves);
 			return validMoves.get(0);
@@ -159,30 +175,27 @@ public class Simulation {
 			QEntry choice = null;
 			double bestUtility = Integer.MIN_VALUE;
 			for (QEntry e : validMoves) {
-                            double thisUtility = getUtility(e);
-                            if(thisUtility > bestUtility){
-                                
-                                    bestUtility = thisUtility;
-                                    choice = e;
-                            }
+				double thisUtility = getUtility(e);
+				if (thisUtility > bestUtility) {
+
+					bestUtility = thisUtility;
+					choice = e;
+				}
 			}
 			return choice;
 		}
 	}
 
 	public void printQTable() {
-//		for (QEntry e : qtable.keySet()) {
-//			System.out.println(e+" "+qtable.get(e));
-//		}
+		// for (QEntry e : qtable.keySet()) {
+		// System.out.println(e+" "+qtable.get(e));
+		// }
 
-                List<QEntry> entries = new ArrayList(qtable.keySet());
-                entries
-                    .stream()
-                    .filter((qe) -> qtable.get(qe) != 0.0) // Reducing noise
-                    .sorted((qe1, qe2) -> qe1.compareByCol(qe2))
-                    .sorted((qe1, qe2) -> qe1.compareByRow(qe2))
-                    .sorted((qe1, qe2) -> qe1.compareByBlock(qe2))
-                    .forEach((e) -> System.out.println(e + " " + qtable.get(e)));
+		List<QEntry> entries = new ArrayList(qtable.keySet());
+		entries.stream().filter((qe) -> qtable.get(qe) != 0.0) // Reducing noise
+				.sorted((qe1, qe2) -> qe1.compareByCol(qe2)).sorted((qe1, qe2) -> qe1.compareByRow(qe2))
+				.sorted((qe1, qe2) -> qe1.compareByBlock(qe2))
+				.forEach((e) -> System.out.println(e + " " + qtable.get(e)));
 	}
 
 	public ArrayList<QEntry> getValidMoves(State state) {
@@ -197,42 +210,38 @@ public class Simulation {
 			moves.add(QEntry.MoveWest(state));
 		if (col < 5)
 			moves.add(QEntry.MoveEast(state));
-		if (goodPickUp(state))
-			moves.add(QEntry.PickUp(state));
-		if (goodDropOff(state))
-			moves.add(QEntry.DropOff(state));
 		return moves;
 	}
 
 	public static void main(String[] args) {
-            
 		double alpha = .5; // Learning rate
 		double gamma = .3; // Discount factor
-		double randomChoice = .35;//Double.parseDouble(args[2]);
+		double randomChoice = .35;// Double.parseDouble(args[2]);
 		Simulation sim = new Simulation(alpha, gamma, randomChoice);
-		sim.simulate(100000);
+		sim.simulate(10000);
 		sim.printQTable();
-                sim.currentState.printFullState();
-                /*
-                NOTES FROM CLASS
-                
-                * Do not use the whole state space, it will never learn anything —or at least it will take too long to do it
-                * Reduce the State space to the Reinforcement Learning space (either 1 or 2 options)
-                
-                State Space 1: <-- Which is our case..
-                * Position of the agent and if it carries a block
-                * Totally ignores how many blocks are in both pickup/dropoff locations
-                */
-                
-//            Hashtable<String, Double> table = new Hashtable();
-//            QEntry e1 = QEntry.MoveSouth(new State(1,5,0));
-//            QEntry e2 = QEntry.MoveSouth(new State(1,5,0));
-//            System.out.println(e1.equals(e2));
-//            table.put(e1.toString(), -0.9);
-//            System.out.println(table.size());
-//            table.put(e2.toString(), 100.0);
-//            System.out.println(table.size());
-//            for(String e:table.keySet())
-//                System.out.println(e + " " + table.get(e));
+		sim.currentState.printFullState();
+		/*
+		 * NOTES FROM CLASS
+		 * 
+		 * Do not use the whole state space, it will never learn anything —or
+		 * at least it will take too long to do it Reduce the State space to the
+		 * Reinforcement Learning space (either 1 or 2 options)
+		 * 
+		 * State Space 1: <-- Which is our case.. Position of the agent and if
+		 * it carries a block Totally ignores how many blocks are in both
+		 * pickup/dropoff locations
+		 */
+
+		// Hashtable<String, Double> table = new Hashtable();
+		// QEntry e1 = QEntry.MoveSouth(new State(1,5,0));
+		// QEntry e2 = QEntry.MoveSouth(new State(1,5,0));
+		// System.out.println(e1.equals(e2));
+		// table.put(e1.toString(), -0.9);
+		// System.out.println(table.size());
+		// table.put(e2.toString(), 100.0);
+		// System.out.println(table.size());
+		// for(String e:table.keySet())
+		// System.out.println(e + " " + table.get(e));
 	}
 }
