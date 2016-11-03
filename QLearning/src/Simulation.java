@@ -52,9 +52,6 @@ public class Simulation {
 			} else if (s.agentRow == 5 && s.agentCol == 5) {
 				currentState.p3--;
 			}
-			System.out.print("Picking up ");
-			currentState.printFullState();
-
 			break;
 		case DROPOFF:
 			if (s.agentRow == 5 && s.agentCol == 1) {
@@ -64,8 +61,6 @@ public class Simulation {
 			} else if (s.agentRow == 2 && s.agentCol == 5) {
 				currentState.d3++;
 			}
-			System.out.print("Dropping off ");
-			currentState.printFullState();
 		}
 	}
 
@@ -130,7 +125,7 @@ public class Simulation {
 				!locationFull;
 	}
 
-	public void simulate(int maxSteps) {
+	public int simulate(int maxSteps) {
 		for (int i = 0; i < maxSteps; i++) {
 			State state = new State(currentState.agentRow, currentState.agentCol, currentState.hasBlock);
 			QEntry e = policy(state);
@@ -142,10 +137,11 @@ public class Simulation {
 			currentState.hasBlock = nextState.hasBlock;
 
 			if (currentState.isGoalState()) {
-				System.out.println("GOAL STATE REACHED AT ITERATION " + i);
-				return;
+				//System.out.println("GOAL STATE REACHED AT ITERATION " + i);
+				return i;
 			}
 		}
+		return maxSteps;
 	}
 
 	public QEntry policy(State state) {
@@ -217,36 +213,26 @@ public class Simulation {
 		}
 	}
 
-	public static void main(String[] args) {
-		double alpha = .5; // Learning rate
-		double gamma = .3; // Discount factor
-		double randomChoice = .35;// Double.parseDouble(args[2]);
-		Simulation sim = new Simulation(alpha, gamma, randomChoice);
-		sim.simulate(5000);
-		sim.printQTable();
-		sim.currentState.printFullState();
-		sim.printOccupantBoard();
-		/*
-		 * NOTES FROM CLASS
-		 * 
-		 * Do not use the whole state space, it will never learn anything —or
-		 * at least it will take too long to do it Reduce the State space to the
-		 * Reinforcement Learning space (either 1 or 2 options)
-		 * 
-		 * State Space 1: <-- Which is our case.. Position of the agent and if
-		 * it carries a block Totally ignores how many blocks are in both
-		 * pickup/dropoff locations
-		 */
-
-		// Hashtable<String, Double> table = new Hashtable();
-		// QEntry e1 = QEntry.MoveSouth(new State(1,5,0));
-		// QEntry e2 = QEntry.MoveSouth(new State(1,5,0));
-		// System.out.println(e1.equals(e2));
-		// table.put(e1.toString(), -0.9);
-		// System.out.println(table.size());
-		// table.put(e2.toString(), 100.0);
-		// System.out.println(table.size());
-		// for(String e:table.keySet())
-		// System.out.println(e + " " + table.get(e));
+	public static void main(String[] args) {		
+		double randomChoice = .35;
+		for(int numTests = 0; numTests < 10; numTests++){
+			int minIterations = Integer.MAX_VALUE;
+			double bestAlpha = 0.0;
+			double bestGamma = 0.0;
+			for(double alpha = 0.1; alpha<1.0;alpha+=0.1){
+				for(double gamma = 0.1; gamma < 1.0; gamma+=0.1){
+					//System.out.println("Simulating with learning rate: "+alpha+ " and discount rate: "+gamma);
+					Simulation sim = new Simulation(alpha, gamma, randomChoice);
+					int iterations = sim.simulate(5000);
+					if(iterations < minIterations){
+						minIterations = iterations;
+						bestAlpha = alpha;
+						bestGamma = gamma;
+					}
+				}	
+			}
+			System.out.printf("Best performance: alpha: %1.1f gamma: %1.1f with iterations: %d\n",bestAlpha,bestGamma,minIterations);	
+		}
+		
 	}
 }
