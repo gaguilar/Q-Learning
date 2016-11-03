@@ -35,8 +35,7 @@ public class Simulation {
 	 */
 	public void updateQTable(QEntry entry) {
 		double oldUtility = getUtility(entry);
-		double newUtility = (1 - alpha) * oldUtility
-				+ alpha * (entry.getImmediateReward() + gamma * getMaxUtilityNextMove(applyMove(entry)));
+		double newUtility = (1 - alpha) * oldUtility + alpha * (entry.getImmediateReward() + gamma * getMaxUtilityNextMove(applyMove(entry)));
 		qtable.put(entry, newUtility);
 
 	}
@@ -48,33 +47,25 @@ public class Simulation {
 		case PICKUP:
 			if (s.agentRow == 1 && s.agentCol == 1) {
 				currentState.p1--;
-				if(currentState.p1 == 0)
-					board[0][0] = Occupant.Empty;
 			} else if (s.agentRow == 3 && s.agentCol == 3) {
 				currentState.p2--;
-				if(currentState.p2 == 0)
-					board[2][2] = Occupant.Empty;
 			} else if (s.agentRow == 5 && s.agentCol == 5) {
 				currentState.p3--;
-				if(currentState.p1 == 0)
-					board[4][4] = Occupant.Empty;
 			}
+			System.out.print("Picking up ");
+			currentState.printFullState();
 
 			break;
 		case DROPOFF:
 			if (s.agentRow == 5 && s.agentCol == 1) {
 				currentState.d1++;
-				if(currentState.d1 == 5)
-					board[4][0] = Occupant.Empty;
 			} else if (s.agentRow == 5 && s.agentCol == 3) {
 				currentState.d2++;
-				if(currentState.d2 == 5)
-					board[4][2] = Occupant.Empty;
 			} else if (s.agentRow == 2 && s.agentCol == 5) {
 				currentState.d3++;
-				if(currentState.d3 == 5)
-					board[1][4] = Occupant.Empty;
 			}
+			System.out.print("Dropping off ");
+			currentState.printFullState();
 		}
 	}
 
@@ -122,19 +113,21 @@ public class Simulation {
 	}
 
 	public boolean goodPickUp(State state) {
-		return agentInBounds(state) && state.hasBlock == 0
-				&& board[state.agentRow - 1][state.agentCol - 1] == Occupant.PickUp;
+		int row = state.agentRow;
+		int col = state.agentCol;
+		boolean locationEmpty = (currentState.p1 == 0 && row == 1 && col == 1) || (currentState.p2 == 0 && row == 3 && col == 3) || (currentState.p3 == 0 && row == 5 && col == 5);
+		return 	state.hasBlock == 0 && 
+				board[row - 1][col - 1] == Occupant.PickUp &&
+				!locationEmpty;
 	}
 
 	public boolean goodDropOff(State state) {
-		return agentInBounds(state) && state.hasBlock == 1
-				&& board[state.agentRow - 1][state.agentCol - 1] == Occupant.DropOff;
-	}
-
-	private boolean agentInBounds(State state) {
-		int r = state.agentRow;
-		int c = state.agentCol;
-		return r >= 1 && r <= 5 && c >= 1 && c <= 5;
+		int row = state.agentRow;
+		int col = state.agentCol;
+		boolean locationFull = (currentState.d1 == 5 && row == 5 && col == 1) || (currentState.d2 == 5 && row == 5 && col == 3) || (currentState.d3 == 5 && row == 2 && col == 5);
+		return 	state.hasBlock == 1 && 
+				board[row - 1][col - 1] == Occupant.DropOff &&
+				!locationFull;
 	}
 
 	public void simulate(int maxSteps) {
@@ -142,8 +135,8 @@ public class Simulation {
 			State state = new State(currentState.agentRow, currentState.agentCol, currentState.hasBlock);
 			QEntry e = policy(state);
 			updateQTable(e);
-			updatePickupDropoffLocations(e);
 			State nextState = applyMove(e);
+			updatePickupDropoffLocations(e);
 			currentState.agentRow = nextState.agentRow;
 			currentState.agentCol = nextState.agentCol;
 			currentState.hasBlock = nextState.hasBlock;
@@ -177,7 +170,6 @@ public class Simulation {
 			for (QEntry e : validMoves) {
 				double thisUtility = getUtility(e);
 				if (thisUtility > bestUtility) {
-
 					bestUtility = thisUtility;
 					choice = e;
 				}
@@ -210,7 +202,19 @@ public class Simulation {
 			moves.add(QEntry.MoveWest(state));
 		if (col < 5)
 			moves.add(QEntry.MoveEast(state));
+		if (goodDropOff(state))
+			moves.add(QEntry.DropOff(state));
+		if (goodPickUp(state))
+			moves.add(QEntry.PickUp(state));
 		return moves;
+	}
+	
+	public void printOccupantBoard(){
+		for(Occupant[] row : board){
+			for(Occupant o : row)
+				System.out.print(o+" ");
+			System.out.println();
+		}
 	}
 
 	public static void main(String[] args) {
@@ -218,9 +222,10 @@ public class Simulation {
 		double gamma = .3; // Discount factor
 		double randomChoice = .35;// Double.parseDouble(args[2]);
 		Simulation sim = new Simulation(alpha, gamma, randomChoice);
-		sim.simulate(10000);
+		sim.simulate(5000);
 		sim.printQTable();
 		sim.currentState.printFullState();
+		sim.printOccupantBoard();
 		/*
 		 * NOTES FROM CLASS
 		 * 
