@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Random;
 
 public class Simulation {
 	public static enum Occupant {
@@ -17,6 +18,10 @@ public class Simulation {
 	Hashtable<QEntry, Double> qtable;
 	double alpha, gamma;
 	double randomChance;
+	
+	////// RANDOM SEED = 115 ///////
+	Random random = new Random(115);
+	////////////////////////////////
 
 	FullState currentState;
 
@@ -153,12 +158,10 @@ public class Simulation {
 		}
 
 		ArrayList<QEntry> validMoves = getValidMoves(state);
-		double roll = Math.random();
+		double roll = random.nextDouble();
 
 		if (roll <= randomChance) {
-			// do random
-			Collections.shuffle(validMoves);
-			return validMoves.get(0);
+			return validMoves.get(random.nextInt(validMoves.size()));
 		} else {
 			// do highest utility
 			QEntry choice = null;
@@ -212,16 +215,17 @@ public class Simulation {
 			System.out.println();
 		}
 	}
-
-	public static void main(String[] args) {		
-		double randomChoice = .35;
+	
+	/* Run 10 tests of: choose alpha/gamma values from 0.1 to 0.9 and do simulations.
+	 * All results of same randomChoice should be the same because the Random Number Generator has the same seed.
+	*/
+	public static void testRandomSeed(double randomChoice){
 		for(int numTests = 0; numTests < 10; numTests++){
 			int minIterations = Integer.MAX_VALUE;
 			double bestAlpha = 0.0;
 			double bestGamma = 0.0;
 			for(double alpha = 0.1; alpha<1.0;alpha+=0.1){
 				for(double gamma = 0.1; gamma < 1.0; gamma+=0.1){
-					//System.out.println("Simulating with learning rate: "+alpha+ " and discount rate: "+gamma);
 					Simulation sim = new Simulation(alpha, gamma, randomChoice);
 					int iterations = sim.simulate(5000);
 					if(iterations < minIterations){
@@ -233,6 +237,11 @@ public class Simulation {
 			}
 			System.out.printf("Best performance: alpha: %1.1f gamma: %1.1f with iterations: %d\n",bestAlpha,bestGamma,minIterations);	
 		}
-		
+	}
+
+	public static void main(String[] args) {
+		testRandomSeed(1.0);
+		testRandomSeed(0.65);
+		testRandomSeed(0.35);
 	}
 }
