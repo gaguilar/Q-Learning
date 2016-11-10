@@ -15,7 +15,6 @@ public class FullState extends State {
 	}
 
 	public boolean isGoalState() {
-		// TODO: We need to take care of empty pickup and full dropoff locations
 		return (hasBlock == 0 && p1 == 0 && p2 == 0 && p3 == 0 && d1 == 5 && d2 == 5 && d3 == 5);
 	}
 

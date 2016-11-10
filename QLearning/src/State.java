@@ -15,7 +15,7 @@ public class State {
 	}
 	
 	public String toString(){
-		return new String(agentRow+", "+agentCol+" "+hasBlock);
+		return new String(agentRow+" "+agentCol+" "+hasBlock);
 	}
 	
 }

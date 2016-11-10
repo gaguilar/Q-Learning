@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
@@ -18,6 +17,8 @@ public class Simulation {
 	Hashtable<QEntry, Double> qtable;
 	double alpha, gamma;
 	double randomChance;
+	
+	boolean firstDropOffFilled, secondDropOffFilled;
 	
 	////// RANDOM SEED = 115 ///////
 	Random random = new Random(115);
@@ -42,7 +43,6 @@ public class Simulation {
 		double oldUtility = getUtility(entry);
 		double newUtility = (1 - alpha) * oldUtility + alpha * (entry.getImmediateReward() + gamma * getMaxUtilityNextMove(applyMove(entry)));
 		qtable.put(entry, newUtility);
-
 	}
 
 	public void updatePickupDropoffLocations(QEntry entry) {
@@ -66,6 +66,8 @@ public class Simulation {
 			} else if (s.agentRow == 2 && s.agentCol == 5) {
 				currentState.d3++;
 			}
+		default:
+			break;
 		}
 	}
 
@@ -137,16 +139,33 @@ public class Simulation {
 			updateQTable(e);
 			State nextState = applyMove(e);
 			updatePickupDropoffLocations(e);
+			
+			if(!firstDropOffFilled && exactlyOneDropOffFilled()){
+				firstDropOffFilled = true;
+				System.out.println("First drop off location filled\n");
+				printQTable();
+			}
+			
+			if(!secondDropOffFilled && exactlyTwoDropOffFilled()){
+				secondDropOffFilled = true;
+				System.out.println("Second drop off location filled\n");
+				printQTable();
+			}
+			
 			currentState.agentRow = nextState.agentRow;
 			currentState.agentCol = nextState.agentCol;
 			currentState.hasBlock = nextState.hasBlock;
 
 			if (currentState.isGoalState()) {
-				//System.out.println("GOAL STATE REACHED AT ITERATION " + i);
 				return i;
 			}
 		}
 		return maxSteps;
+	}
+	
+	// Call after simulation is complete to reset agent but keep learned QTable values
+	public void resetFullState(){
+		currentState = new FullState(1, 5, 0, 5, 5, 5, 0, 0, 0);
 	}
 
 	public QEntry policy(State state) {
@@ -182,7 +201,7 @@ public class Simulation {
 		// System.out.println(e+" "+qtable.get(e));
 		// }
 
-		List<QEntry> entries = new ArrayList(qtable.keySet());
+		List<QEntry> entries = new ArrayList<QEntry>(qtable.keySet());
 		entries.stream().filter((qe) -> qtable.get(qe) != 0.0) // Reducing noise
 				.sorted((qe1, qe2) -> qe1.compareByCol(qe2)).sorted((qe1, qe2) -> qe1.compareByRow(qe2))
 				.sorted((qe1, qe2) -> qe1.compareByBlock(qe2))
@@ -207,6 +226,10 @@ public class Simulation {
 			moves.add(QEntry.PickUp(state));
 		return moves;
 	}
+
+	public void setRandomChance(double r){
+		randomChance = r;
+	}
 	
 	public void printOccupantBoard(){
 		for(Occupant[] row : board){
@@ -227,7 +250,7 @@ public class Simulation {
 			for(double alpha = 0.1; alpha<1.0;alpha+=0.1){
 				for(double gamma = 0.1; gamma < 1.0; gamma+=0.1){
 					Simulation sim = new Simulation(alpha, gamma, randomChoice);
-					int iterations = sim.simulate(5000);
+					int iterations = sim.simulate(1000);
 					if(iterations < minIterations){
 						minIterations = iterations;
 						bestAlpha = alpha;
@@ -238,10 +261,32 @@ public class Simulation {
 			System.out.printf("Best performance: alpha: %1.1f gamma: %1.1f with iterations: %d\n",bestAlpha,bestGamma,minIterations);	
 		}
 	}
+	
+	public boolean exactlyOneDropOffFilled(){
+		return (currentState.d1 == 5 && currentState.d2 != 5 && currentState.d3 != 5) ||
+				(currentState.d1 != 5 && currentState.d2 == 5 && currentState.d3 != 5) ||
+				(currentState.d1 != 5 && currentState.d2 != 5 && currentState.d3 == 5);
+	}
+	
+	public boolean exactlyTwoDropOffFilled(){
+		return (currentState.d1 == 5 && currentState.d2 == 5 && currentState.d3 != 5) ||
+				(currentState.d1 == 5 && currentState.d2 != 5 && currentState.d3 == 5) ||
+				(currentState.d1 != 5 && currentState.d2 == 5 && currentState.d3 == 5);
+	}
 
+	public static void Experiment1(){
+		System.out.println("Experiment 1");
+		Simulation sim = new Simulation(0.3, 0.7, 1.0);
+		sim.simulate(100);
+		System.out.println("QTable after 100 simulations");
+		sim.printQTable();
+		int iterations = sim.simulate(9900) + 100;
+		System.out.printf("QTable after %d simulations\n", iterations);
+		sim.printQTable();
+		System.out.println("End Experiment 1");
+	}
+	
 	public static void main(String[] args) {
-		testRandomSeed(1.0);
-		testRandomSeed(0.65);
-		testRandomSeed(0.35);
+		Experiment1();
 	}
 }
