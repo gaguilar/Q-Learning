@@ -132,8 +132,7 @@ public class Simulation {
 				!locationFull;
 	}
 
-	public int simulate(int maxSteps) {
-		for (int i = 0; i < maxSteps; i++) {
+	public boolean step() {
 			State state = new State(currentState.agentRow, currentState.agentCol, currentState.hasBlock);
 			QEntry e = policy(state);
 			updateQTable(e);
@@ -155,12 +154,8 @@ public class Simulation {
 			currentState.agentRow = nextState.agentRow;
 			currentState.agentCol = nextState.agentCol;
 			currentState.hasBlock = nextState.hasBlock;
-
-			if (currentState.isGoalState()) {
-				return i;
-			}
-		}
-		return maxSteps;
+			
+			return currentState.isGoalState();
 	}
 	
 	// Call after simulation is complete to reset agent but keep learned QTable values
@@ -250,7 +245,14 @@ public class Simulation {
 			for(double alpha = 0.1; alpha<1.0;alpha+=0.1){
 				for(double gamma = 0.1; gamma < 1.0; gamma+=0.1){
 					Simulation sim = new Simulation(alpha, gamma, randomChoice);
-					int iterations = sim.simulate(1000);
+					int iterations = 0;
+					for(int i = 0; i < 10000; i++){
+						boolean finished = sim.step();
+						if(finished){
+							iterations = i;
+							break;
+						}
+					}
 					if(iterations < minIterations){
 						minIterations = iterations;
 						bestAlpha = alpha;
@@ -274,19 +276,53 @@ public class Simulation {
 				(currentState.d1 != 5 && currentState.d2 == 5 && currentState.d3 == 5);
 	}
 
-	public static void Experiment1(){
+	public static void Experiment1(Simulation sim){
 		System.out.println("Experiment 1");
-		Simulation sim = new Simulation(0.3, 0.7, 1.0);
-		sim.simulate(100);
-		System.out.println("QTable after 100 simulations");
-		sim.printQTable();
-		int iterations = sim.simulate(9900) + 100;
+		int iterations = 0;
+		for(int i=0;i<10000;i++){
+			if(i == 100){
+				System.out.println("QTable after 100 simulations");
+				sim.printQTable();
+			}
+			boolean finished = sim.step();
+			
+			if(finished){
+				iterations = i;
+				break;
+			}
+		}
 		System.out.printf("QTable after %d simulations\n", iterations);
 		sim.printQTable();
+		
+		sim.resetFullState();	
+		
+		iterations = 0;
+		for(int i=0;i<10000;i++){
+			if(i == 100){
+				System.out.println("QTable after 100 simulations");
+				sim.printQTable();
+			}
+			boolean finished = sim.step();
+			
+			if(finished){
+				iterations = i;
+				break;
+			}
+		}
+		System.out.printf("QTable after %d simulations\n", iterations);
+		sim.printQTable();
+		
 		System.out.println("End Experiment 1");
 	}
 	
+	public static void RunExperiment1(){
+		Simulation sim = new Simulation(0.3, 0.3, 1.0);
+		Experiment1(sim);
+		sim.resetFullState();
+		Experiment1(sim);
+	}
+	
 	public static void main(String[] args) {
-		Experiment1();
+		RunExperiment1();
 	}
 }
