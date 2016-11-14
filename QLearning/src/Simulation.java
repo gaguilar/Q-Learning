@@ -358,8 +358,8 @@ public class Simulation {
 		Simulation sim = new Simulation(0.3, 0.3, 1.0);
 		Consumer<Simulation> cons = (s) -> s.printQTable();
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
-            return s.currentState.isGoalState();
-        };
+                    return s.currentState.isGoalState();
+                };
 
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.1);
@@ -379,8 +379,8 @@ public class Simulation {
 			boolean everyHundred = i != 0 && i % 100 == 0;
 			boolean isGoalState = s.currentState.isGoalState();
 			
-            return everyHundred || isGoalState;
-        };
+                        return everyHundred || isGoalState;
+                };
 
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.1);
@@ -397,8 +397,8 @@ public class Simulation {
 		Simulation sim = new Simulation(0.5, 0.3, 1.0);
 		Consumer<Simulation> cons = (s) -> s.printQTable();
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
-            return s.currentState.isGoalState();
-        };
+                    return s.currentState.isGoalState();
+                };
 
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.35);
