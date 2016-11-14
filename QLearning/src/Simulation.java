@@ -354,10 +354,70 @@ public class Simulation {
 	}
         
 
+	public static void RunExperiment3() {
+		Simulation sim = new Simulation(0.3, 0.3, 1.0);
+		Consumer<Simulation> cons = (s) -> s.printQTable();
+		BiPredicate<Simulation, Integer> pred = (s, i) -> {
+            return s.currentState.isGoalState();
+        };
+
+		sim.simulate(100, pred, cons);
+		sim.setRandomChance(0.1);
+		sim.simulate(9900, pred, cons);
+		
+		sim.resetFullState();
+		
+		sim.simulate(100, pred, cons);
+		sim.setRandomChance(0.1);
+		sim.simulate(9900, pred, cons);
+	}
+
+	public static void RunExperiment4() {
+		Simulation sim = new Simulation(0.5, 0.3, 1.0);
+		Consumer<Simulation> cons = (s) -> s.printQTable();
+		BiPredicate<Simulation, Integer> pred = (s, i) -> {
+			boolean everyHundred = i != 0 && i % 100 == 0;
+			boolean isGoalState = s.currentState.isGoalState();
+			
+            return everyHundred || isGoalState;
+        };
+
+		sim.simulate(100, pred, cons);
+		sim.setRandomChance(0.1);
+		sim.simulate(9900, pred, cons);
+		
+		sim.resetFullState();
+		
+		sim.simulate(100, pred, cons);
+		sim.setRandomChance(0.1);
+		sim.simulate(9900, pred, cons);
+	}
+
+	public static void RunExperiment6() {
+		Simulation sim = new Simulation(0.5, 0.3, 1.0);
+		Consumer<Simulation> cons = (s) -> s.printQTable();
+		BiPredicate<Simulation, Integer> pred = (s, i) -> {
+            return s.currentState.isGoalState();
+        };
+
+		sim.simulate(100, pred, cons);
+		sim.setRandomChance(0.35);
+		sim.simulate(9900, pred, cons);
+		
+		sim.resetFullState();
+		
+		sim.simulate(100, pred, cons);
+		sim.setRandomChance(0.35);
+		sim.simulate(9900, pred, cons);
+	}
+
 	public static void main(String[] args) {
                 int iterations = 10000;
                 Experiment1(iterations);
                 Experiment2(iterations);
                 Experiment5(iterations);
+		RunExperiment3();
+		RunExperiment4();
+		RunExperiment6();
 	}
 }
