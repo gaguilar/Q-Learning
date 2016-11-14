@@ -289,7 +289,26 @@ public class Simulation {
 			cons.accept(sim);
 	}
 
-	public static Boolean CheckConditions(Simulation s, int i) {
+	public static Boolean Experiment1Lambda(Simulation s, int i) {
+		boolean firstHundred = i == 100;
+		boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
+		boolean isGoalState = s.currentState.isGoalState();
+
+		if (firstDropOff)
+			s.firstDropOffFilled = true;
+
+		// For debugging
+		if (firstHundred)
+			System.out.printf("====================\na) First Hundred (i = %d)!\n", i);
+		if (firstDropOff)
+			System.out.println("====================\nb) First dropoff location filled!");
+		if (isGoalState)
+			System.out.println("====================\nc) Goal state!");
+
+		return firstHundred || firstDropOff || isGoalState;
+	}
+
+	public static Boolean Experiment2Lambda(Simulation s, int i) {
 		boolean everyHundred = i != 0 && i % 100 == 0;
 		boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
 		boolean isGoalState = s.currentState.isGoalState();
@@ -310,7 +329,16 @@ public class Simulation {
 
 	public static void Experiment1(Simulation sim) {
 		Consumer<Simulation> cons = (s) -> s.printQTable();
-		BiPredicate<Simulation, Integer> pred = (s, i) -> CheckConditions(s, i);
+		BiPredicate<Simulation, Integer> pred = (s, i) -> Experiment1Lambda(s, i);
+
+		sim.simulate(10000, pred, cons);
+		sim.resetFullState();
+		sim.simulate(10000, pred, cons);
+	}
+
+	public static void Experiment2(Simulation sim) {
+		Consumer<Simulation> cons = (s) -> s.printQTable();
+		BiPredicate<Simulation, Integer> pred = (s, i) -> Experiment2Lambda(s, i);
 
 		sim.simulate(10000, pred, cons);
 		sim.resetFullState();
