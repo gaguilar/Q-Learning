@@ -2,6 +2,10 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class Simulation {
 	public static enum Occupant {
@@ -131,31 +135,32 @@ public class Simulation {
 				board[row - 1][col - 1] == Occupant.DropOff &&
 				!locationFull;
 	}
+        
+        public void simulate(int maxSteps, BiPredicate<Simulation, Integer> pred, Consumer<Simulation> cons)
+        {
+                for(int i=0; i<maxSteps; i++)
+                {
+                    Boolean isGoalState = step();
+                    PrintExperiment(this, i, pred, cons);
+                    
+                    if(isGoalState) return;
+                }
+        }
+        
+        
+	public boolean step() 
+        {
+                State state = new State(currentState.agentRow, currentState.agentCol, currentState.hasBlock);
+                QEntry e = policy(state);
+                updateQTable(e);
+                State nextState = applyMove(e);
+                updatePickupDropoffLocations(e);
 
-	public boolean step() {
-			State state = new State(currentState.agentRow, currentState.agentCol, currentState.hasBlock);
-			QEntry e = policy(state);
-			updateQTable(e);
-			State nextState = applyMove(e);
-			updatePickupDropoffLocations(e);
-			
-			if(!firstDropOffFilled && exactlyOneDropOffFilled()){
-				firstDropOffFilled = true;
-				System.out.println("First drop off location filled\n");
-				printQTable();
-			}
-			
-			if(!secondDropOffFilled && exactlyTwoDropOffFilled()){
-				secondDropOffFilled = true;
-				System.out.println("Second drop off location filled\n");
-				printQTable();
-			}
-			
-			currentState.agentRow = nextState.agentRow;
-			currentState.agentCol = nextState.agentCol;
-			currentState.hasBlock = nextState.hasBlock;
-			
-			return currentState.isGoalState();
+                currentState.agentRow = nextState.agentRow;
+                currentState.agentCol = nextState.agentCol;
+                currentState.hasBlock = nextState.hasBlock;
+
+                return currentState.isGoalState();
 	}
 	
 	// Call after simulation is complete to reset agent but keep learned QTable values
@@ -192,15 +197,12 @@ public class Simulation {
 	}
 
 	public void printQTable() {
-		// for (QEntry e : qtable.keySet()) {
-		// System.out.println(e+" "+qtable.get(e));
-		// }
-
-		List<QEntry> entries = new ArrayList<QEntry>(qtable.keySet());
-		entries.stream().filter((qe) -> qtable.get(qe) != 0.0) // Reducing noise
-				.sorted((qe1, qe2) -> qe1.compareByCol(qe2)).sorted((qe1, qe2) -> qe1.compareByRow(qe2))
-				.sorted((qe1, qe2) -> qe1.compareByBlock(qe2))
-				.forEach((e) -> System.out.println(e + " " + qtable.get(e)));
+		List<QEntry> entries = new ArrayList<>(qtable.keySet());
+		entries.stream()
+                    .filter((qe) -> qtable.get(qe) != 0.0)
+                    .sorted((qe1, qe2) -> qe1.compareByCol(qe2)).sorted((qe1, qe2) -> qe1.compareByRow(qe2))
+                    .sorted((qe1, qe2) -> qe1.compareByBlock(qe2))
+                    .forEach((e) -> System.out.println(e + " " + qtable.get(e)));
 	}
 
 	public ArrayList<QEntry> getValidMoves(State state) {
@@ -276,49 +278,39 @@ public class Simulation {
 				(currentState.d1 != 5 && currentState.d2 == 5 && currentState.d3 == 5);
 	}
 
-	public static void Experiment1(Simulation sim){
-		System.out.println("Experiment 1");
-		int iterations = 0;
-		for(int i=0;i<10000;i++){
-			if(i == 100){
-				System.out.println("QTable after 100 simulations");
-				sim.printQTable();
-			}
-			boolean finished = sim.step();
-			
-			if(finished){
-				iterations = i;
-				break;
-			}
-		}
-		System.out.printf("QTable after %d simulations\n", iterations);
-		sim.printQTable();
-		
-		sim.resetFullState();	
-		
-		iterations = 0;
-		for(int i=0;i<10000;i++){
-			if(i == 100){
-				System.out.println("QTable after 100 simulations");
-				sim.printQTable();
-			}
-			boolean finished = sim.step();
-			
-			if(finished){
-				iterations = i;
-				break;
-			}
-		}
-		System.out.printf("QTable after %d simulations\n", iterations);
-		sim.printQTable();
-		
-		System.out.println("End Experiment 1");
+        public static void PrintExperiment(Simulation sim, int i, BiPredicate<Simulation, Integer> pred, Consumer<Simulation> cons){
+                if(pred.test(sim, i)) 
+                    cons.accept(sim);
+        }
+        
+        public static Boolean CheckConditions(Simulation s, int i)
+        {
+                boolean everyHundred = i != 0 && i % 100 == 0; 
+                boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
+                boolean isGoalState  = s.currentState.isGoalState();
+
+                if(firstDropOff) s.firstDropOffFilled = true;
+
+                // For debugging
+                if(everyHundred) System.out.printf("====================\na) Every Hundred (i = %d)!\n", i);
+                if(firstDropOff) System.out.println("====================\nb) First dropoff location filled!");
+                if(isGoalState)  System.out.println("====================\nc) Goal state!");
+
+                return everyHundred || firstDropOff || isGoalState;
+        }
+        
+	public static void Experiment1(Simulation sim)
+        {
+                Consumer<Simulation> cons = (s) -> s.printQTable(); 
+                BiPredicate<Simulation, Integer> pred = (s, i) -> CheckConditions(s, i);
+
+                sim.simulate(10000, pred, cons);
+                sim.resetFullState();	
+                sim.simulate(10000, pred, cons);
 	}
 	
 	public static void RunExperiment1(){
 		Simulation sim = new Simulation(0.3, 0.3, 1.0);
-		Experiment1(sim);
-		sim.resetFullState();
 		Experiment1(sim);
 	}
 	
