@@ -7,6 +7,8 @@ import java.util.function.Consumer;
 
 public class Simulation {
 
+	public ArrayList<String> pickupLocations, dropoffLocations;
+	
 	Hashtable<QEntry, Double> qtable;
 	double alpha, gamma;
 	double randomChance;
@@ -34,6 +36,10 @@ public class Simulation {
 		d2c = 3;
 		d3r = 2;
 		d3c = 5;
+		dropoffLocations = new ArrayList<String>();
+		dropoffLocations.add(d1r+" "+d1c);
+		dropoffLocations.add(d2r+" "+d2c);
+		dropoffLocations.add(d3r+" "+d3c);
 		
 		p1r = 1;
 		p1c = 1;
@@ -41,6 +47,10 @@ public class Simulation {
 		p2c = 3;
 		p3r = 5;
 		p3c = 5;
+		pickupLocations = new ArrayList<String>();
+		pickupLocations.add(p1r+" "+p1c);
+		pickupLocations.add(p2r+" "+p2c);
+		pickupLocations.add(p3r+" "+p3c);
 	}
 
 	/*
@@ -130,7 +140,7 @@ public class Simulation {
 		boolean locationEmpty = (currentState.p1 == 0 && row == p1r && col == p1c) ||
 				(currentState.p2 == 0 && row == p2r && col == p2c) || 
 				(currentState.p3 == 0 && row == p3r && col == p3c);
-		return state.hasBlock == 0 && !locationEmpty;
+		return state.hasBlock == 0 && !locationEmpty && pickupLocations.contains(row+" "+col);
 	}
 
 	public boolean goodDropOff(State state) {
@@ -139,7 +149,7 @@ public class Simulation {
 		boolean locationFull = (currentState.d1 == 5 && row == d1r && col == d1c) || 
 				(currentState.d2 == 5 && row == d2r && col == d2c) || 
 				(currentState.d3 == 5 && row == d3r && col == d3c);
-		return state.hasBlock == 1 && !locationFull;
+		return state.hasBlock == 1 && !locationFull && dropoffLocations.contains(row+" "+col);
 	}
 
 	public void simulate(int maxSteps, BiPredicate<Simulation, Integer> pred, Consumer<Simulation> cons) {
@@ -303,6 +313,7 @@ public class Simulation {
 	}
 
 	public static void RunExperiment1(int iterations) {
+		System.out.println("EXPERIMENT 1");
                 Simulation sim = new Simulation(0.3, 0.3, 1.0);
                 
 		Consumer<Simulation> cons = (s) -> s.printQTable();
@@ -323,6 +334,7 @@ public class Simulation {
 	}
 
 	public static void RunExperiment2(int iterations) {
+		System.out.println("EXPERIMENT 2");
                 Simulation sim = new Simulation(0.3, 0.3, 1.0);
                 
 		Consumer<Simulation> cons = (s) -> s.printQTable();
@@ -354,6 +366,7 @@ public class Simulation {
 	}
         
 	public static void RunExperiment5(int iterations) {
+		System.out.println("EXPERIMENT 5");
                 Simulation sim = new Simulation(0.5, 0.3, 0.1);
                 
 		Consumer<Simulation> cons = (s) -> s.printQTable();
@@ -383,6 +396,7 @@ public class Simulation {
         
 
 	public static void RunExperiment3(int iterations) {
+		System.out.println("EXPERIMENT 3");
 		Simulation sim = new Simulation(0.3, 0.3, 1.0);
 		Consumer<Simulation> cons = (s) -> s.printQTable();
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
@@ -403,6 +417,7 @@ public class Simulation {
 	}
 
 	public static void RunExperiment4(int iterations) {
+		System.out.println("EXPERIMENT 4");
 		Simulation sim = new Simulation(0.5, 0.3, 1.0);
 		Consumer<Simulation> cons = (s) -> s.printQTable();
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
@@ -426,6 +441,7 @@ public class Simulation {
 	}
 
 	public static void RunExperiment6(int iterations) {
+		System.out.println("EXPERIMENT 6");
 		Simulation sim = new Simulation(0.5, 0.3, 1.0);
 		Consumer<Simulation> cons = (s) -> s.printQTable();
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
@@ -454,7 +470,7 @@ public class Simulation {
 	}
 
 	public static void main(String[] args) {
-        int iterations = 10000;
+		int iterations = 10000;
         RunExperiment1(iterations);
         RunExperiment2(iterations);
 		RunExperiment3(iterations);
