@@ -7,11 +7,11 @@ import java.util.function.Consumer;
 
 public class Simulation {
 
-	public static ArrayList<String> dropOffLocations, pickUpLocations;	
-
 	Hashtable<QEntry, Double> qtable;
 	double alpha, gamma;
 	double randomChance;
+	
+	public int p1r, p1c, p2r, p2c, p3r, p3c, d1r, d1c, d2r, d2c, d3r, d3c;
 
 	boolean firstDropOffFilled, secondDropOffFilled;
 
@@ -28,15 +28,19 @@ public class Simulation {
 		qtable = new Hashtable<QEntry, Double>();
 		currentState = new FullState(1, 5, 0, 5, 5, 5, 0, 0, 0);
 		
-		dropOffLocations = new ArrayList<String>();
-		dropOffLocations.add(5 + " " + 1);
-		dropOffLocations.add(5 + " " + 3);
-		dropOffLocations.add(2 + " " + 5);
+		d1r = 5;
+		d1c = 1;
+		d2r = 5;
+		d2c = 3;
+		d3r = 2;
+		d3c = 5;
 		
-		pickUpLocations = new ArrayList<String>();
-		pickUpLocations.add(1 + " " + 1);
-		pickUpLocations.add(3 + " " + 3);
-		pickUpLocations.add(5 + " " + 5);
+		p1r = 1;
+		p1c = 1;
+		p2r = 3;
+		p2c = 3;
+		p3r = 5;
+		p3c = 5;
 	}
 
 	/*
@@ -54,23 +58,22 @@ public class Simulation {
 	public void updatePickupDropoffLocations(QEntry entry) {
 		// update current state pickup/dropoff location counts
 		State s = entry.s;
-		String location = s.agentRow + " " + s.agentCol;
 		switch (entry.a) {
 		case PICKUP:
-			if (((s.agentRow == 1 && s.agentCol == 1) || (s.agentRow == 5 && s.agentCol == 1)) && pickUpLocations.contains(location)) {
+			if (s.agentRow == p1r && s.agentCol == p1c) {
 				currentState.p1--;
-			} else if (((s.agentRow == 3 && s.agentCol == 3) || (s.agentRow == 5 && s.agentCol == 3)) && pickUpLocations.contains(location)) {
+			} else if (s.agentRow == p2r && s.agentCol == p2c) {
 				currentState.p2--;
-			} else if (((s.agentRow == 5 && s.agentCol == 5) || (s.agentRow == 2 && s.agentCol == 5)) && pickUpLocations.contains(location)) {
+			} else if (s.agentRow == p3r && s.agentCol == p3c) {
 				currentState.p3--;
 			}
 			break;
 		case DROPOFF:
-			if (((s.agentRow == 1 && s.agentCol == 1) || (s.agentRow == 5 && s.agentCol == 1)) && dropOffLocations.contains(location)) {
+			if (s.agentRow == d1r && s.agentCol == d1c) {
 				currentState.d1++;
-			} else if (((s.agentRow == 3 && s.agentCol == 3) || (s.agentRow == 5 && s.agentCol == 3)) && dropOffLocations.contains(location)) {
+			} else if (s.agentRow == d2r && s.agentCol == d2c) {
 				currentState.d2++;
-			} else if (((s.agentRow == 5 && s.agentCol == 5) || (s.agentRow == 2 && s.agentCol == 5)) && dropOffLocations.contains(location)) {
+			} else if (s.agentRow == d3r && s.agentCol == d3c) {
 				currentState.d3++;
 			}
 		default:
@@ -124,20 +127,18 @@ public class Simulation {
 	public boolean goodPickUp(State state) {
 		int row = state.agentRow;
 		int col = state.agentCol;
-		String location = row+" "+col;
-		boolean locationEmpty = (currentState.p1 == 0 && ((row == 1 && col == 1) || (row == 5 && col == 1)) && pickUpLocations.contains(location)) ||
-				(currentState.p2 == 0 && ((row == 3 && col == 3) || (row == 5 && col == 3)) && pickUpLocations.contains(location)) || 
-				(currentState.p3 == 0 && ((row == 5 && col == 5) || (row == 2 && col == 5)) && pickUpLocations.contains(location));
+		boolean locationEmpty = (currentState.p1 == 0 && row == p1r && col == p1c) ||
+				(currentState.p2 == 0 && row == p2r && col == p2c) || 
+				(currentState.p3 == 0 && row == p3r && col == p3c);
 		return state.hasBlock == 0 && !locationEmpty;
 	}
 
 	public boolean goodDropOff(State state) {
 		int row = state.agentRow;
 		int col = state.agentCol;
-		String location = row + " " + col;
-		boolean locationFull = (currentState.d1 == 5 && ((row == 1 && col == 1) || (row == 5 && col == 1)) && dropOffLocations.contains(location)) || 
-				(currentState.d2 == 5 && ((row == 3 && col == 3) || (row == 5 && col == 3)) && dropOffLocations.contains(location)) || 
-				(currentState.d3 == 5 && ((row == 5 && col == 5) || (row == 2 && col == 5)) && dropOffLocations.contains(location));
+		boolean locationFull = (currentState.d1 == 5 && row == d1r && col == d1c) || 
+				(currentState.d2 == 5 && row == d2r && col == d2c) || 
+				(currentState.d3 == 5 && row == d3r && col == d3c);
 		return state.hasBlock == 1 && !locationFull;
 	}
 
@@ -230,15 +231,24 @@ public class Simulation {
 	}
 	
 	public void switchPickUpDropLocations(){
-		ArrayList<String> temp = new ArrayList<String>();
-		for(String s:pickUpLocations)
-			temp.add(s);
-		pickUpLocations.clear();
-		for(String s:dropOffLocations)
-			pickUpLocations.add(s);
-		dropOffLocations.clear();
-		for(String s:temp)
-			dropOffLocations.add(s);
+		int tp1r = p1r;
+		int tp1c = p1c;
+		int tp2r = p2r;
+		int tp2c = p2c;
+		int tp3r = p3r;
+		int tp3c = p3c;
+		p1r = d1r;
+		p1c = d1c;
+		p2r = d2r;
+		p2c = d2c;
+		p3r = d3r;
+		p3c = d3c;
+		d1r = tp1r;
+		d1c = tp1c;
+		d2r = tp2r;
+		d2c = tp2c;
+		d3r = tp3r;
+		d3c = tp3c;
 	}
 
 	/*
@@ -410,10 +420,12 @@ public class Simulation {
 		sim.resetFullState();
 		
 		// change pickup locations
-		pickUpLocations.clear();
-		pickUpLocations.add(2 + " " + 2);
-		pickUpLocations.add(4 + " " + 4);
-		pickUpLocations.add(1 + " " + 5);
+		sim.p1r = 2;
+		sim.p1c = 2;
+		sim.p2r = 4;
+		sim.p2c = 4;
+		sim.p3r = 1;
+		sim.p3c = 5;
 		
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.35);
