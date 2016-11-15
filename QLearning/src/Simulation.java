@@ -302,120 +302,140 @@ public class Simulation {
 			cons.accept(sim);
 	}
 
-	public static void Experiment1(int iterations) {
+	public static void RunExperiment1(int iterations) {
                 Simulation sim = new Simulation(0.3, 0.3, 1.0);
                 
 		Consumer<Simulation> cons = (s) -> s.printQTable();
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
-                    boolean firstHundred = i == 100;
-                    boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
-                    boolean isGoalState = s.currentState.isGoalState();
-                    
-                    if (firstDropOff)
-                            s.firstDropOffFilled = true;
-                    
-                    return firstHundred || firstDropOff || isGoalState;
-                };
+            boolean firstHundred = i == 100;
+            boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
+            boolean isGoalState = s.currentState.isGoalState();
+            
+            if (firstDropOff)
+                    s.firstDropOffFilled = true;
+            
+            return firstHundred || firstDropOff || isGoalState;
+        };
 
 		sim.simulate(iterations, pred, cons);
 		sim.resetFullState();
 		sim.simulate(iterations, pred, cons);
 	}
 
-	public static void Experiment2(int iterations) {
+	public static void RunExperiment2(int iterations) {
                 Simulation sim = new Simulation(0.3, 0.3, 1.0);
                 
 		Consumer<Simulation> cons = (s) -> s.printQTable();
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
-                    boolean everyHundred = i != 0 && i % 100 == 0;
-                    boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
-                    boolean isGoalState = s.currentState.isGoalState();
-                    
-                    if (firstDropOff)
-                            s.firstDropOffFilled = true;
-                    
-                    if (i > 100)
-                            s.randomChance = 0.35; //Change it to Exploit 1
-                    
-                    return everyHundred || firstDropOff || isGoalState;
-                };
-
-		sim.simulate(iterations, pred, cons);
+            boolean everyHundred = i != 0 && i % 100 == 0;
+            boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
+            boolean isGoalState = s.currentState.isGoalState();
+            
+            if (firstDropOff)
+                    s.firstDropOffFilled = true;
+            
+            if (i > 100)
+                    s.randomChance = 0.35; //Change it to Exploit 1
+            
+            return everyHundred || firstDropOff || isGoalState;
+        };
+        
+		sim.setRandomChance(1.0);
+		sim.simulate(100, pred, cons);
+		sim.setRandomChance(0.35);
+		sim.simulate(iterations-100, pred, cons);
+		
 		sim.resetFullState();
-		sim.simulate(iterations, pred, cons);
+
+		sim.setRandomChance(1.0);
+		sim.simulate(100, pred, cons);
+		sim.setRandomChance(0.35);
+		sim.simulate(iterations-100, pred, cons);
 	}
         
-	public static void Experiment5(int iterations) {
+	public static void RunExperiment5(int iterations) {
                 Simulation sim = new Simulation(0.5, 0.3, 0.1);
                 
 		Consumer<Simulation> cons = (s) -> s.printQTable();
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
-                    boolean firstHundred = i == 100;
-                    boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
-                    boolean isGoalState = s.currentState.isGoalState();
-                    
-                    if (firstDropOff)
-                            s.firstDropOffFilled = true;
-                    
-                    return firstHundred || firstDropOff || isGoalState;
-                };
+            boolean firstHundred = i == 100;
+            boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
+            boolean isGoalState = s.currentState.isGoalState();
+            
+            if (firstDropOff)
+                    s.firstDropOffFilled = true;
+            
+            return firstHundred || firstDropOff || isGoalState;
+        };
 
-		sim.simulate(iterations, pred, cons);
+        
+		sim.setRandomChance(0.1);
+		sim.simulate(100, pred, cons);
+		sim.simulate(iterations-100, pred, cons);
+		
 		sim.resetFullState();
-        sim.switchPickUpDropLocations();
-		sim.simulate(iterations, pred, cons);
+		sim.switchPickUpDropLocations();
+
+		sim.setRandomChance(0.1);
+		sim.simulate(100, pred, cons);
+		sim.simulate(iterations-100, pred, cons);
 	}
         
 
-	public static void RunExperiment3() {
+	public static void RunExperiment3(int iterations) {
 		Simulation sim = new Simulation(0.3, 0.3, 1.0);
 		Consumer<Simulation> cons = (s) -> s.printQTable();
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
-                    return s.currentState.isGoalState();
-                };
+            return s.currentState.isGoalState();
+        };
 
+		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.1);
-		sim.simulate(9900, pred, cons);
+		sim.simulate(iterations-100, pred, cons);
 		
 		sim.resetFullState();
-		
+
+		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.1);
-		sim.simulate(9900, pred, cons);
+		sim.simulate(iterations-100, pred, cons);
 	}
 
-	public static void RunExperiment4() {
+	public static void RunExperiment4(int iterations) {
 		Simulation sim = new Simulation(0.5, 0.3, 1.0);
 		Consumer<Simulation> cons = (s) -> s.printQTable();
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
 			boolean everyHundred = i != 0 && i % 100 == 0;
 			boolean isGoalState = s.currentState.isGoalState();
 			
-                        return everyHundred || isGoalState;
-                };
+            return everyHundred || isGoalState;
+        };
 
+		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.1);
-		sim.simulate(9900, pred, cons);
+		sim.simulate(iterations-100, pred, cons);
 		
 		sim.resetFullState();
-		
+
+		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.1);
-		sim.simulate(9900, pred, cons);
+		sim.simulate(iterations-100, pred, cons);
 	}
 
-	public static void RunExperiment6() {
+	public static void RunExperiment6(int iterations) {
 		Simulation sim = new Simulation(0.5, 0.3, 1.0);
 		Consumer<Simulation> cons = (s) -> s.printQTable();
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
-                    return s.currentState.isGoalState();
-                };
+            return s.currentState.isGoalState();
+        };
 
+		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.35);
-		sim.simulate(9900, pred, cons);
+		sim.simulate(iterations-100, pred, cons);
 		
 		sim.resetFullState();
 		
@@ -426,19 +446,20 @@ public class Simulation {
 		sim.p2c = 4;
 		sim.p3r = 1;
 		sim.p3c = 5;
-		
+
+		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.35);
-		sim.simulate(9900, pred, cons);
+		sim.simulate(iterations-100, pred, cons);
 	}
 
 	public static void main(String[] args) {
-                int iterations = 10000;
-                Experiment1(iterations);
-                Experiment2(iterations);
-                Experiment5(iterations);
-		RunExperiment3();
-		RunExperiment4();
-		RunExperiment6();
+        int iterations = 10000;
+        RunExperiment1(iterations);
+        RunExperiment2(iterations);
+		RunExperiment3(iterations);
+		RunExperiment4(iterations);
+		RunExperiment5(iterations);
+		RunExperiment6(iterations);
 	}
 }
