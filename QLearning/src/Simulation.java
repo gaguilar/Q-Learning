@@ -364,6 +364,7 @@ public class Simulation {
 		sim.setRandomChance(0.35);
 		sim.simulate(iterations-100, pred, cons);
 	}
+<<<<<<< HEAD
         
 	public static void RunExperiment5(int iterations) {
 		System.out.println("EXPERIMENT 5");
@@ -394,6 +395,8 @@ public class Simulation {
 		sim.simulate(iterations-100, pred, cons);
 	}
         
+=======
+>>>>>>> origin/master
 
 	public static void RunExperiment3(int iterations) {
 		System.out.println("EXPERIMENT 3");
@@ -437,6 +440,34 @@ public class Simulation {
 		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.1);
+		sim.simulate(iterations-100, pred, cons);
+	}
+    
+	public static void RunExperiment5(int iterations) {
+	            Simulation sim = new Simulation(0.5, 0.3, 0.1);
+	            
+		Consumer<Simulation> cons = (s) -> s.printQTable();
+		BiPredicate<Simulation, Integer> pred = (s, i) -> {
+	        boolean firstHundred = i == 100;
+	        boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
+	        boolean isGoalState = s.currentState.isGoalState();
+	        
+	        if (firstDropOff)
+	                s.firstDropOffFilled = true;
+	        
+	        return firstHundred || firstDropOff || isGoalState;
+	    };
+	
+	    
+		sim.setRandomChance(0.1);
+		sim.simulate(100, pred, cons);
+		sim.simulate(iterations-100, pred, cons);
+		
+		sim.resetFullState();
+		sim.switchPickUpDropLocations();
+	
+		sim.setRandomChance(0.1);
+		sim.simulate(100, pred, cons);
 		sim.simulate(iterations-100, pred, cons);
 	}
 
