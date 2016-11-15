@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 
 public class Simulation {
 
-	ArrayList<String> dropOffLocations, pickUpLocations;	
+	public static ArrayList<String> dropOffLocations, pickUpLocations;	
 
 	Hashtable<QEntry, Double> qtable;
 	double alpha, gamma;
@@ -349,7 +349,7 @@ public class Simulation {
 
 		sim.simulate(iterations, pred, cons);
 		sim.resetFullState();
-                sim.switchPickUpDropLocations();
+        sim.switchPickUpDropLocations();
 		sim.simulate(iterations, pred, cons);
 	}
         
@@ -405,6 +405,12 @@ public class Simulation {
 		sim.simulate(9900, pred, cons);
 		
 		sim.resetFullState();
+		
+		// change pickup locations
+		pickUpLocations.clear();
+		pickUpLocations.add(2 + " " + 2);
+		pickUpLocations.add(4 + " " + 4);
+		pickUpLocations.add(1 + " " + 5);
 		
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.35);
