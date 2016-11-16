@@ -357,8 +357,8 @@ public class Simulation {
 			if (firstDropOff)
 				s.firstDropOffFilled = true;
 
-			if (i > 100)
-				s.randomChance = 0.35; // Change it to Exploit 1
+//			if (i > 100) // Didn't realize this was right before I added code below so comment it out for now
+//				s.randomChance = 0.35; // Change it to Exploit 1
 
 			return everyHundred || firstDropOff || isGoalState;
 		};
