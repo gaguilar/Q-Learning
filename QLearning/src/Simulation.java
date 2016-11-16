@@ -137,19 +137,20 @@ public class Simulation {
 	public boolean goodPickUp(State state) {
 		int row = state.agentRow;
 		int col = state.agentCol;
-		boolean locationEmpty = (currentState.p1 == 0 && row == p1r && col == p1c)
-				|| (currentState.p2 == 0 && row == p2r && col == p2c)
-				|| (currentState.p3 == 0 && row == p3r && col == p3c);
-		return state.hasBlock == 0 && !locationEmpty && pickupLocations.contains(row + " " + col);
+
+		boolean locationGoodPickup = (currentState.p1 > 0 && row == p1r && col == p1c) ||
+				(currentState.p2 > 0 && row == p2r && col == p2c) || 
+				(currentState.p3 > 0 && row == p3r && col == p3c);
+		return state.hasBlock == 0 && locationGoodPickup;
 	}
 
 	public boolean goodDropOff(State state) {
 		int row = state.agentRow;
 		int col = state.agentCol;
-		boolean locationFull = (currentState.d1 == 5 && row == d1r && col == d1c)
-				|| (currentState.d2 == 5 && row == d2r && col == d2c)
-				|| (currentState.d3 == 5 && row == d3r && col == d3c);
-		return state.hasBlock == 1 && !locationFull && dropoffLocations.contains(row + " " + col);
+		boolean locationGoodDropoff = (currentState.d1 < 5 && row == d1r && col == d1c) || 
+				(currentState.d2 < 5 && row == d2r && col == d2c) || 
+				(currentState.d3 < 5 && row == d3r && col == d3c);
+		return state.hasBlock == 1 && locationGoodDropoff;
 	}
 
 	public void simulate(int maxSteps, BiPredicate<Simulation, Integer> pred, Consumer<Simulation> cons) {
