@@ -254,16 +254,6 @@ public class Simulation {
 		d2c = tp2c;
 		d3r = tp3r;
 		d3c = tp3c;
-		
-		ArrayList<String> temp = new ArrayList<String>();
-		for(String s : pickupLocations)
-			temp.add(s);
-		pickupLocations.clear();
-		for(String s : dropoffLocations)
-			pickupLocations.add(s);
-		dropoffLocations.clear();
-		for(String s : temp)
-			dropoffLocations.add(s);
 	}
 
 	/*
@@ -465,10 +455,6 @@ public class Simulation {
 		sim.p2c = 4;
 		sim.p3r = 1;
 		sim.p3c = 5;
-		sim.pickupLocations.clear();
-		sim.pickupLocations.add(sim.p1r + " " + sim.p1c);
-		sim.pickupLocations.add(sim.p2r + " " + sim.p2c);
-		sim.pickupLocations.add(sim.p3r + " " + sim.p3c);
 
 		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
