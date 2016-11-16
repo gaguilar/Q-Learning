@@ -419,5 +419,9 @@ public class Simulation {
 		RunExperiment3();
 		RunExperiment4();
 		RunExperiment6();
+                
+                QTableGUI qTableGUI = new QTableGUI();
+                qTableGUI.setVisible(true);
+                
 	}
 }
