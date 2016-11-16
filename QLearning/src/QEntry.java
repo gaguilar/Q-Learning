@@ -1,5 +1,4 @@
-public class QEntry
-{
+public class QEntry {
 
 	public enum Action {
 		NORTH, SOUTH, EAST, WEST, PICKUP, DROPOFF
@@ -12,7 +11,7 @@ public class QEntry
 		this.s = s;
 		this.a = a;
 	}
-	
+
 	// R(s, a) return immediate reward, where s is some state and a is action
 	public int getImmediateReward() {
 		switch (a) {
@@ -53,61 +52,56 @@ public class QEntry
 		State newState = s.clone();
 		return new QEntry(newState, Action.PICKUP);
 	}
-	
-	public boolean movingNorth(){
+
+	public boolean movingNorth() {
 		return a == Action.NORTH;
 	}
-	
-	public boolean movingSouth(){
+
+	public boolean movingSouth() {
 		return a == Action.SOUTH;
 	}
-	
-	public boolean movingWest(){
+
+	public boolean movingWest() {
 		return a == Action.WEST;
 	}
-	
-	public boolean movingEast(){
+
+	public boolean movingEast() {
 		return a == Action.EAST;
 	}
-	
-	public boolean pickingUp(){
+
+	public boolean pickingUp() {
 		return a == Action.PICKUP;
 	}
-	
-	public boolean droppingOff(){
+
+	public boolean droppingOff() {
 		return a == Action.DROPOFF;
 	}
-        
-        @Override
-        public boolean equals(Object o1)
-        {
-            QEntry e1 = (QEntry) o1;
-            
-            return this.toString().equals(e1.toString());
-        }
-        
-        @Override
-        public int hashCode()
-        {
-            return toString().hashCode();
-        }
-        
-        public int compareByCol(QEntry qe)
-        {
-            return Integer.compare(this.s.agentCol, qe.s.agentCol);
-        }
-        
-        public int compareByRow(QEntry qe)
-        {
-            return Integer.compare(this.s.agentRow, qe.s.agentRow);
-        }
-        
-        public int compareByBlock(QEntry qe)
-        {
-            return Integer.compare(this.s.hasBlock, qe.s.hasBlock);
-        }
-        
+
+	@Override
+	public boolean equals(Object o1) {
+		QEntry e1 = (QEntry) o1;
+
+		return this.toString().equals(e1.toString());
+	}
+
+	@Override
+	public int hashCode() {
+		return toString().hashCode();
+	}
+
+	public int compareByCol(QEntry qe) {
+		return Integer.compare(this.s.agentCol, qe.s.agentCol);
+	}
+
+	public int compareByRow(QEntry qe) {
+		return Integer.compare(this.s.agentRow, qe.s.agentRow);
+	}
+
+	public int compareByBlock(QEntry qe) {
+		return Integer.compare(this.s.hasBlock, qe.s.hasBlock);
+	}
+
 	public String toString() {
-		return new String(s.toString()+ " " + a);
+		return new String(s.toString() + " " + a);
 	}
 }

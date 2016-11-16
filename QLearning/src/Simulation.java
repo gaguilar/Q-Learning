@@ -7,8 +7,6 @@ import java.util.function.Consumer;
 
 public class Simulation {
 
-	public ArrayList<String> pickupLocations, dropoffLocations;
-
 	Hashtable<QEntry, Double> qtable;
 	double alpha, gamma;
 	double randomChance;
@@ -110,9 +108,8 @@ public class Simulation {
 			if (state.agentRow < 5)
 				state.agentRow += 1;
 		} else if (entry.movingEast()) {
-			if (state.agentCol < 5) {
+			if (state.agentCol < 5)
 				state.agentCol += 1;
-			}
 		} else if (entry.movingWest()) {
 			if (state.agentCol > 1)
 				state.agentCol -= 1;
@@ -145,14 +142,15 @@ public class Simulation {
 		return state.hasBlock == 1 && locationGoodDropoff;
 	}
 
-	public void simulate(int maxSteps, BiPredicate<Simulation, Integer> pred, Consumer<Simulation> cons) {
+	public int simulate(int maxSteps, BiPredicate<Simulation, Integer> pred, Consumer<Simulation> cons) {
 		for (int i = 0; i < maxSteps; i++) {
-			Boolean isGoalState = step();
+			boolean isGoalState = step();
 			PrintExperiment(this, i, pred, cons);
 
 			if (isGoalState)
-				return;
+				return i;
 		}
+		return maxSteps;
 	}
 
 	public boolean step() {
@@ -205,7 +203,6 @@ public class Simulation {
 
 	public void printQTable() {
 		currentState.printFullState();
-		
 		List<QEntry> entries = new ArrayList<>(qtable.keySet());
 		entries.stream().filter((qe) -> qtable.get(qe) != 0.0).sorted((qe1, qe2) -> qe1.compareByCol(qe2))
 				.sorted((qe1, qe2) -> qe1.compareByRow(qe2)).sorted((qe1, qe2) -> qe1.compareByBlock(qe2))
@@ -323,9 +320,9 @@ public class Simulation {
 			return firstHundred || firstDropOff || isGoalState;
 		};
 
-		sim.simulate(iterations, pred, cons);
+		System.out.println("STEPS TAKEN FIRST RUN " + sim.simulate(iterations, pred, cons) + "\n");
 		sim.resetFullState();
-		sim.simulate(iterations, pred, cons);
+		System.out.println("STEPS TAKEN SECOND RUN " + sim.simulate(iterations, pred, cons) + "\n");
 	}
 
 	public static void RunExperiment2(int iterations) {
@@ -350,14 +347,14 @@ public class Simulation {
 		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.35);
-		sim.simulate(iterations - 100, pred, cons);
+		System.out.println("STEPS TAKEN FIRST RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
 
 		sim.resetFullState();
 
 		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.35);
-		sim.simulate(iterations - 100, pred, cons);
+		System.out.println("STEPS TAKEN SECOND RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
 	}
 
 	public static void RunExperiment5(int iterations) {
@@ -378,14 +375,14 @@ public class Simulation {
 
 		sim.setRandomChance(0.1);
 		sim.simulate(100, pred, cons);
-		sim.simulate(iterations - 100, pred, cons);
+		System.out.println("STEPS TAKEN FIRST RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
 
 		sim.resetFullState();
 		sim.switchPickUpDropLocations();
 
 		sim.setRandomChance(0.1);
 		sim.simulate(100, pred, cons);
-		sim.simulate(iterations - 100, pred, cons);
+		System.out.println("STEPS TAKEN SECOND RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
 	}
 
 	public static void RunExperiment3(int iterations) {
@@ -399,14 +396,14 @@ public class Simulation {
 		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.1);
-		sim.simulate(iterations - 100, pred, cons);
+		System.out.println("STEPS TAKEN FIRST RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
 
 		sim.resetFullState();
 
 		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.1);
-		sim.simulate(iterations - 100, pred, cons);
+		System.out.println("STEPS TAKEN SECOND RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
 	}
 
 	public static void RunExperiment4(int iterations) {
@@ -423,14 +420,14 @@ public class Simulation {
 		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.1);
-		sim.simulate(iterations - 100, pred, cons);
+		System.out.println("STEPS TAKEN FIRST RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
 
 		sim.resetFullState();
 
 		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.1);
-		sim.simulate(iterations - 100, pred, cons);
+		System.out.println("STEPS TAKEN SECOND RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
 	}
 
 	public static void RunExperiment6(int iterations) {
@@ -444,7 +441,7 @@ public class Simulation {
 		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.35);
-		sim.simulate(iterations - 100, pred, cons);
+		System.out.println("STEPS TAKEN FIRST RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
 
 		sim.resetFullState();
 
@@ -459,7 +456,7 @@ public class Simulation {
 		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.35);
-		sim.simulate(iterations - 100, pred, cons);
+		System.out.println("STEPS TAKEN SECOND RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
 	}
 
 	public static void main(String[] args) {
