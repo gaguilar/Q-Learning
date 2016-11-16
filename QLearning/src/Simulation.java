@@ -36,10 +36,6 @@ public class Simulation {
 		d2c = 3;
 		d3r = 2;
 		d3c = 5;
-		dropoffLocations = new ArrayList<String>();
-		dropoffLocations.add(d1r + " " + d1c);
-		dropoffLocations.add(d2r + " " + d2c);
-		dropoffLocations.add(d3r + " " + d3c);
 
 		p1r = 1;
 		p1c = 1;
@@ -47,10 +43,6 @@ public class Simulation {
 		p2c = 3;
 		p3r = 5;
 		p3c = 5;
-		pickupLocations = new ArrayList<String>();
-		pickupLocations.add(p1r + " " + p1c);
-		pickupLocations.add(p2r + " " + p2c);
-		pickupLocations.add(p3r + " " + p3c);
 	}
 
 	/*
@@ -212,6 +204,8 @@ public class Simulation {
 	}
 
 	public void printQTable() {
+		currentState.printFullState();
+		
 		List<QEntry> entries = new ArrayList<>(qtable.keySet());
 		entries.stream().filter((qe) -> qtable.get(qe) != 0.0).sorted((qe1, qe2) -> qe1.compareByCol(qe2))
 				.sorted((qe1, qe2) -> qe1.compareByRow(qe2)).sorted((qe1, qe2) -> qe1.compareByBlock(qe2))
