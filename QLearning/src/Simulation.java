@@ -49,10 +49,8 @@ public class Simulation {
 	 * maxqtable(qentry) for all moves after taking action 'a'
 	 */
 	public void updateQTable(QEntry entry) {
-		System.out.println("updating");
 		double oldUtility = getUtility(entry);
-		double newUtility = (1 - alpha) * oldUtility
-				+ alpha * (entry.getImmediateReward() + gamma * getMaxUtilityNextMove(applyMove(entry)));
+		double newUtility = (1 - alpha) * oldUtility + alpha * (entry.getImmediateReward() + gamma * getMaxUtilityNextMove(applyMove(entry)));
 		addQEntry(entry, newUtility);
 	}
 
@@ -116,17 +114,17 @@ public class Simulation {
 			return 0.0;
 		}
 		if (entry.movingNorth())
-			return qtable.get(entry)[0];
+			return qtable.get(entry.s)[0];
 		if (entry.movingSouth())
-			return qtable.get(entry)[1];
+			return qtable.get(entry.s)[1];
 		if (entry.movingEast())
-			return qtable.get(entry)[2];
+			return qtable.get(entry.s)[2];
 		if (entry.movingWest())
-			return qtable.get(entry)[3];
+			return qtable.get(entry.s)[3];
 		if (entry.pickingUp())
-			return qtable.get(entry)[4];
+			return qtable.get(entry.s)[4];
 		if (entry.droppingOff())
-			return qtable.get(entry)[5];
+			return qtable.get(entry.s)[5];
 		return -1.0;
 	}
 
@@ -244,11 +242,20 @@ public class Simulation {
 
 	public void printQTable() {
 		currentState.printFullState();
+		System.out.println("State\t| NORTH\t\t| SOUTH\t\t| EAST\t\t| WEST\t\t| PICKUP\t| DROPOFF");
+		System.out.println("--------------------------------------------------------------------------------------------------");
 		List<State> entries = new ArrayList<>(qtable.keySet());
 		entries.stream().sorted((qe1, qe2) -> qe1.compareByCol(qe2)).sorted((qe1, qe2) -> qe1.compareByRow(qe2))
 				.sorted((qe1, qe2) -> qe1.compareByBlock(qe2))
-				.forEach((e) -> System.out.println(e + " " + qtable.get(e)[0] + " " + qtable.get(e)[1] + " "
-						+ qtable.get(e)[2] + " " + qtable.get(e)[3] + " " + qtable.get(e)[4] + " " + qtable.get(e)[5]));
+				.forEach((e) -> {
+					System.out.printf("%s\t| %+08.4f\t| %+08.4f\t| %+08.4f\t| %+08.4f\t| %+08.4f\t| %+08.4f\n",e,qtable.get(e)[0],qtable.get(e)[1],qtable.get(e)[2],qtable.get(e)[3],qtable.get(e)[4],qtable.get(e)[5]);
+					if(e.agentRow==5 && e.agentCol==5 && e.hasBlock ==0){
+						System.out.println();
+						System.out.println("State\t| NORTH\t\t| SOUTH\t\t| EAST\t\t| WEST\t\t| PICKUP\t| DROPOFF");
+						System.out.println("--------------------------------------------------------------------------------------------------");
+					}
+				});
+		System.out.println();
 	}
 
 	public ArrayList<QEntry> getValidMoves(State state) {
@@ -510,8 +517,9 @@ public class Simulation {
 		RunExperiment4(iterations);
 		RunExperiment5(iterations);
 		RunExperiment6(iterations);
-
+/*
 		QTableGUI qTableGUI = new QTableGUI();
 		qTableGUI.setVisible(true);
+	*/
 	}
 }

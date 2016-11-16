@@ -25,7 +25,6 @@ public class State {
 	@Override
 	public boolean equals(Object o1) {
 		State e1 = (State) o1;
-
 		return this.toString().equals(e1.toString());
 	}
 	
