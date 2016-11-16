@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 
 public class Simulation {
 
-	Hashtable<QEntry, Double> qtable;
+	Hashtable<State, double[]> qtable;
 	double alpha, gamma;
 	double randomChance;
 
@@ -25,7 +25,7 @@ public class Simulation {
 		alpha = learningRate;
 		gamma = discountRate;
 		this.randomChance = randomChoice;
-		qtable = new Hashtable<QEntry, Double>();
+		qtable = new Hashtable<State, double[]>();
 		currentState = new FullState(1, 5, 0, 5, 5, 5, 0, 0, 0);
 
 		d1r = 5;
@@ -49,10 +49,35 @@ public class Simulation {
 	 * maxqtable(qentry) for all moves after taking action 'a'
 	 */
 	public void updateQTable(QEntry entry) {
+		System.out.println("updating");
 		double oldUtility = getUtility(entry);
 		double newUtility = (1 - alpha) * oldUtility
 				+ alpha * (entry.getImmediateReward() + gamma * getMaxUtilityNextMove(applyMove(entry)));
-		qtable.put(entry, newUtility);
+		addQEntry(entry, newUtility);
+	}
+
+	// for utility array.... [0]=NORTH [1]=SOUTH [2]=EAST [3]=WEST [4]=PICKUP
+	// [5]=DROPOFF
+	public void addQEntry(QEntry entry, double utility) {
+		double[] utilities = qtable.get(entry.s);
+
+		if (utilities == null)
+			utilities = new double[6];
+
+		if (entry.movingNorth())
+			utilities[0] = utility;
+		if (entry.movingSouth())
+			utilities[1] = utility;
+		if (entry.movingEast())
+			utilities[2] = utility;
+		if (entry.movingWest())
+			utilities[3] = utility;
+		if (entry.pickingUp())
+			utilities[4] = utility;
+		if (entry.droppingOff())
+			utilities[5] = utility;
+
+		qtable.put(entry.s, utilities);
 	}
 
 	public void updatePickupDropoffLocations(QEntry entry) {
@@ -83,10 +108,26 @@ public class Simulation {
 
 	// Q(s, a) look up Q value for being in some state and taking some action.
 	// If a QEntry does not exist add it with a default utility value.
+
+	// for utility array.... [0]=NORTH [1]=SOUTH [2]=EAST [3]=WEST [4]=PICKUP [5]=DROPOFF
 	public double getUtility(QEntry entry) {
-		if (!qtable.containsKey(entry))
-			qtable.put(entry, 0.0);
-		return qtable.get(entry);
+		if (!qtable.containsKey(entry.s)) {
+			qtable.put(entry.s, new double[6]);
+			return 0.0;
+		}
+		if (entry.movingNorth())
+			return qtable.get(entry)[0];
+		if (entry.movingSouth())
+			return qtable.get(entry)[1];
+		if (entry.movingEast())
+			return qtable.get(entry)[2];
+		if (entry.movingWest())
+			return qtable.get(entry)[3];
+		if (entry.pickingUp())
+			return qtable.get(entry)[4];
+		if (entry.droppingOff())
+			return qtable.get(entry)[5];
+		return -1.0;
 	}
 
 	public double getMaxUtilityNextMove(State state) {
@@ -127,18 +168,18 @@ public class Simulation {
 		int row = state.agentRow;
 		int col = state.agentCol;
 
-		boolean locationGoodPickup = (currentState.p1 > 0 && row == p1r && col == p1c) ||
-				(currentState.p2 > 0 && row == p2r && col == p2c) || 
-				(currentState.p3 > 0 && row == p3r && col == p3c);
+		boolean locationGoodPickup = (currentState.p1 > 0 && row == p1r && col == p1c)
+				|| (currentState.p2 > 0 && row == p2r && col == p2c)
+				|| (currentState.p3 > 0 && row == p3r && col == p3c);
 		return state.hasBlock == 0 && locationGoodPickup;
 	}
 
 	public boolean goodDropOff(State state) {
 		int row = state.agentRow;
 		int col = state.agentCol;
-		boolean locationGoodDropoff = (currentState.d1 < 5 && row == d1r && col == d1c) || 
-				(currentState.d2 < 5 && row == d2r && col == d2c) || 
-				(currentState.d3 < 5 && row == d3r && col == d3c);
+		boolean locationGoodDropoff = (currentState.d1 < 5 && row == d1r && col == d1c)
+				|| (currentState.d2 < 5 && row == d2r && col == d2c)
+				|| (currentState.d3 < 5 && row == d3r && col == d3c);
 		return state.hasBlock == 1 && locationGoodDropoff;
 	}
 
@@ -203,10 +244,11 @@ public class Simulation {
 
 	public void printQTable() {
 		currentState.printFullState();
-		List<QEntry> entries = new ArrayList<>(qtable.keySet());
-		entries.stream().filter((qe) -> qtable.get(qe) != 0.0).sorted((qe1, qe2) -> qe1.compareByCol(qe2))
-				.sorted((qe1, qe2) -> qe1.compareByRow(qe2)).sorted((qe1, qe2) -> qe1.compareByBlock(qe2))
-				.forEach((e) -> System.out.println(e + " " + qtable.get(e)));
+		List<State> entries = new ArrayList<>(qtable.keySet());
+		entries.stream().sorted((qe1, qe2) -> qe1.compareByCol(qe2)).sorted((qe1, qe2) -> qe1.compareByRow(qe2))
+				.sorted((qe1, qe2) -> qe1.compareByBlock(qe2))
+				.forEach((e) -> System.out.println(e + " " + qtable.get(e)[0] + " " + qtable.get(e)[1] + " "
+						+ qtable.get(e)[2] + " " + qtable.get(e)[3] + " " + qtable.get(e)[4] + " " + qtable.get(e)[5]));
 	}
 
 	public ArrayList<QEntry> getValidMoves(State state) {
@@ -338,8 +380,9 @@ public class Simulation {
 			if (firstDropOff)
 				s.firstDropOffFilled = true;
 
-//			if (i > 100) // Didn't realize this was right before I added code below so comment it out for now
-//				s.randomChance = 0.35; // Change it to Exploit 1
+			// if (i > 100) // Didn't realize this was right before I added code
+			// below so comment it out for now
+			// s.randomChance = 0.35; // Change it to Exploit 1
 
 			return everyHundred || firstDropOff || isGoalState;
 		};
@@ -467,9 +510,8 @@ public class Simulation {
 		RunExperiment4(iterations);
 		RunExperiment5(iterations);
 		RunExperiment6(iterations);
-                
-                QTableGUI qTableGUI = new QTableGUI();
-                qTableGUI.setVisible(true);
-                
+
+		QTableGUI qTableGUI = new QTableGUI();
+		qTableGUI.setVisible(true);
 	}
 }

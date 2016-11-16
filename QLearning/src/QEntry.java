@@ -89,17 +89,7 @@ public class QEntry {
 		return toString().hashCode();
 	}
 
-	public int compareByCol(QEntry qe) {
-		return Integer.compare(this.s.agentCol, qe.s.agentCol);
-	}
-
-	public int compareByRow(QEntry qe) {
-		return Integer.compare(this.s.agentRow, qe.s.agentRow);
-	}
-
-	public int compareByBlock(QEntry qe) {
-		return Integer.compare(this.s.hasBlock, qe.s.hasBlock);
-	}
+	
 
 	public String toString() {
 		return new String(s.toString() + " " + a);

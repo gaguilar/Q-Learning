@@ -10,6 +10,30 @@ public class State {
 		hasBlock = x;
 	}
 	
+	public int compareByCol(State qe) {
+		return Integer.compare(this.agentCol, qe.agentCol);
+	}
+
+	public int compareByRow(State qe) {
+		return Integer.compare(this.agentRow, qe.agentRow);
+	}
+
+	public int compareByBlock(State qe) {
+		return Integer.compare(this.hasBlock, qe.hasBlock);
+	}
+	
+	@Override
+	public boolean equals(Object o1) {
+		State e1 = (State) o1;
+
+		return this.toString().equals(e1.toString());
+	}
+	
+	@Override
+	public int hashCode() {
+		return toString().hashCode();
+	}
+	
 	public State clone(){
 		return new State(agentRow, agentCol, hasBlock);
 	}
