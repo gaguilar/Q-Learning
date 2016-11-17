@@ -495,11 +495,11 @@ public class Simulation {
 		Simulation sim = new Simulation(0.3, 0.3, 1.0, "Experiment3.csv");
 		BiConsumer<Simulation, Integer> cons = (s, i) -> s.printQTable(i);
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
-			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be
-							// Exploit 2 for i == 100
+			boolean everyHundred = i != 0 && i % 100 == 0;
+			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be Exploit 2 for i == 100
 				s.randomChance = 0.1; // Change it to Exploit 2
-
-			return s.currentState.isGoalState();
+			 
+			return everyHundred || s.currentState.isGoalState();
 		};
 
 		System.out.println("STEPS TAKEN FIRST RUN " + (sim.simulate(iterations, pred, cons)));
