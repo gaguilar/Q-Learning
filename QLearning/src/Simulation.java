@@ -2,8 +2,8 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
+import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
-import java.util.function.Consumer;
 
 public class Simulation {
 
@@ -181,7 +181,7 @@ public class Simulation {
 		return state.hasBlock == 1 && locationGoodDropoff;
 	}
 
-	public int simulate(int maxSteps, BiPredicate<Simulation, Integer> pred, Consumer<Simulation> cons) {
+	public int simulate(int maxSteps, BiPredicate<Simulation, Integer> pred, BiConsumer<Simulation, Integer> cons) {
 		for (int i = 0; i < maxSteps; i++) {
 			boolean isGoalState = step();
 			PrintExperiment(this, i, pred, cons);
@@ -240,9 +240,15 @@ public class Simulation {
 		}
 	}
 
-	public void printQTable() {
+	public void printQTable(int i) {
 		currentState.printFullState();
-		System.out.println("State\t| NORTH\t\t| SOUTH\t\t| EAST\t\t| WEST\t\t| PICKUP\t| DROPOFF");
+                System.out.printf("Iteration: %d\n", i);
+                System.out.printf("Alpha: %f\n", alpha);
+                System.out.printf("Gamma: %f\n", gamma);
+                System.out.printf("Random Chance: %f\n", randomChance);
+                
+		System.out.println("--------------------------------------------------------------------------------------------------");
+                System.out.println("State\t| NORTH\t\t| SOUTH\t\t| EAST\t\t| WEST\t\t| PICKUP\t| DROPOFF");
 		System.out.println("--------------------------------------------------------------------------------------------------");
 		List<State> entries = new ArrayList<>(qtable.keySet());
 		entries.stream().sorted((qe1, qe2) -> qe1.compareByCol(qe2)).sorted((qe1, qe2) -> qe1.compareByRow(qe2))
@@ -251,6 +257,7 @@ public class Simulation {
 					System.out.printf("%s\t| %+08.4f\t| %+08.4f\t| %+08.4f\t| %+08.4f\t| %+08.4f\t| %+08.4f\n",e,qtable.get(e)[0],qtable.get(e)[1],qtable.get(e)[2],qtable.get(e)[3],qtable.get(e)[4],qtable.get(e)[5]);
 					if(e.agentRow==5 && e.agentCol==5 && e.hasBlock ==0){
 						System.out.println();
+                                                System.out.println("--------------------------------------------------------------------------------------------------");
 						System.out.println("State\t| NORTH\t\t| SOUTH\t\t| EAST\t\t| WEST\t\t| PICKUP\t| DROPOFF");
 						System.out.println("--------------------------------------------------------------------------------------------------");
 					}
@@ -348,16 +355,16 @@ public class Simulation {
 	}
 
 	public static void PrintExperiment(Simulation sim, int i, BiPredicate<Simulation, Integer> pred,
-			Consumer<Simulation> cons) {
+			BiConsumer<Simulation, Integer> cons) {
 		if (pred.test(sim, i))
-			cons.accept(sim);
+			cons.accept(sim, i);
 	}
 
 	public static void RunExperiment1(int iterations) {
 		System.out.println("EXPERIMENT 1");
 		Simulation sim = new Simulation(0.3, 0.3, 1.0);
 
-		Consumer<Simulation> cons = (s) -> s.printQTable();
+		BiConsumer<Simulation, Integer> cons = (s,i) -> s.printQTable(i);
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
 			boolean firstHundred = i == 100;
 			boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
@@ -378,7 +385,7 @@ public class Simulation {
 		System.out.println("EXPERIMENT 2");
 		Simulation sim = new Simulation(0.3, 0.3, 1.0);
 
-		Consumer<Simulation> cons = (s) -> s.printQTable();
+		BiConsumer<Simulation, Integer> cons = (s,i) -> s.printQTable(i);
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
 			boolean everyHundred = i != 0 && i % 100 == 0;
 			boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
@@ -387,7 +394,7 @@ public class Simulation {
 			if (firstDropOff)
 				s.firstDropOffFilled = true;
 
-			// if (i > 100) // Didn't realize this was right before I added code
+			// if (i >= 100) // Didn't realize this was right before I added code
 			// below so comment it out for now
 			// s.randomChance = 0.35; // Change it to Exploit 1
 
@@ -411,7 +418,7 @@ public class Simulation {
 		System.out.println("EXPERIMENT 5");
 		Simulation sim = new Simulation(0.5, 0.3, 0.1);
 
-		Consumer<Simulation> cons = (s) -> s.printQTable();
+		BiConsumer<Simulation, Integer> cons = (s,i) -> s.printQTable(i);
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
 			boolean firstHundred = i == 100;
 			boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
@@ -438,7 +445,7 @@ public class Simulation {
 	public static void RunExperiment3(int iterations) {
 		System.out.println("EXPERIMENT 3");
 		Simulation sim = new Simulation(0.3, 0.3, 1.0);
-		Consumer<Simulation> cons = (s) -> s.printQTable();
+		BiConsumer<Simulation, Integer> cons = (s,i) -> s.printQTable(i);
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
 			return s.currentState.isGoalState();
 		};
@@ -459,7 +466,7 @@ public class Simulation {
 	public static void RunExperiment4(int iterations) {
 		System.out.println("EXPERIMENT 4");
 		Simulation sim = new Simulation(0.5, 0.3, 1.0);
-		Consumer<Simulation> cons = (s) -> s.printQTable();
+		BiConsumer<Simulation, Integer> cons = (s,i) -> s.printQTable(i);
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
 			boolean everyHundred = i != 0 && i % 100 == 0;
 			boolean isGoalState = s.currentState.isGoalState();
@@ -483,7 +490,7 @@ public class Simulation {
 	public static void RunExperiment6(int iterations) {
 		System.out.println("EXPERIMENT 6");
 		Simulation sim = new Simulation(0.5, 0.3, 1.0);
-		Consumer<Simulation> cons = (s) -> s.printQTable();
+		BiConsumer<Simulation, Integer> cons = (s,i) -> s.printQTable(i);
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
 			return s.currentState.isGoalState();
 		};
@@ -512,11 +519,11 @@ public class Simulation {
 	public static void main(String[] args) {
 		int iterations = 10000;
 		RunExperiment1(iterations);
-		RunExperiment2(iterations);
-		RunExperiment3(iterations);
-		RunExperiment4(iterations);
-		RunExperiment5(iterations);
-		RunExperiment6(iterations);
+//		RunExperiment2(iterations);
+//		RunExperiment3(iterations);
+//		RunExperiment4(iterations);
+//		RunExperiment5(iterations);
+//		RunExperiment6(iterations);
 /*
 		QTableGUI qTableGUI = new QTableGUI();
 		qTableGUI.setVisible(true);
