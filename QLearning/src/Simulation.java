@@ -282,8 +282,8 @@ public class Simulation {
         public void showQTableGUI(int experimentNumber, int finalIterations)
         {
             qTableGUI.setQTableMetaData(experimentNumber, alpha, gamma, currentState, finalIterations, randomChance);
+            qTableGUI.setLocationRelativeTo(null);
             qTableGUI.setVisible(true);
-            
             
             List<State> entries = new ArrayList<>(qtable.keySet());
             entries.stream().forEach((e) -> {
