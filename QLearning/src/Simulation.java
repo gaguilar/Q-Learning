@@ -273,7 +273,7 @@ public class Simulation {
 				});
 		System.out.println();
 	}
-
+        
 	public ArrayList<QEntry> getValidMoves(State state) {
 		ArrayList<QEntry> moves = new ArrayList<QEntry>();
 		int row = state.agentRow;
@@ -379,8 +379,9 @@ public class Simulation {
 			boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
 			boolean isGoalState = s.currentState.isGoalState();
 
-			if (firstDropOff)
+			if (firstDropOff){
 				s.firstDropOffFilled = true;
+                        }
 
 			return firstHundred || firstDropOff || isGoalState;
 		};
@@ -521,15 +522,17 @@ public class Simulation {
 
 	public static void main(String[] args) {
 		int iterations = 10000;
+                
+                //QTableGUI qTableGUI = QTableGUI.GetQTableGUI();
+                //qTableGUI.setVisible(true);
+                
 		RunExperiment1(iterations);
-//		RunExperiment2(iterations);
-//		RunExperiment3(iterations);
-//		RunExperiment4(iterations);
-//		RunExperiment5(iterations);
-//		RunExperiment6(iterations);
-/*
-		QTableGUI qTableGUI = new QTableGUI();
-		qTableGUI.setVisible(true);
-	*/
+		RunExperiment2(iterations);
+		RunExperiment3(iterations);
+		RunExperiment4(iterations);
+		RunExperiment5(iterations);
+		RunExperiment6(iterations);
+                
+                //qTableGUI.setLocationValues(0, 0, 0.1f, 0.1f, 0.1f, 0.1f);
 	}
 }

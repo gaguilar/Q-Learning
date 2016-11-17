@@ -15,6 +15,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -34,6 +36,21 @@ public class QTableGUI extends javax.swing.JFrame {
     /**
      * Creates new form NewJFrame
      */
+    JPanel[][] jPanels;
+    
+    private static QTableGUI qTableGUI;
+    
+    public static QTableGUI GetQTableGUI()
+    {
+        if(qTableGUI == null)
+        {
+            qTableGUI = new QTableGUI();
+        }
+        
+        return qTableGUI;
+    }
+    
+    
     public QTableGUI() {
         initComponents();
         setTitle("QTable Visualization");
@@ -69,9 +86,40 @@ public class QTableGUI extends javax.swing.JFrame {
         mb.add(menu);
         
         this.setJMenuBar(mb);
+        
+        jPanels = new JPanel[5][5];
+        jPanels[0][0] = jPanel1;
+        jPanels[0][1] = jPanel2;
+        jPanels[0][2] = jPanel3;
+        jPanels[0][3] = jPanel4;
+        jPanels[0][4] = jPanel5;
+        
+        jPanels[1][0] = jPanel6;
+        jPanels[1][1] = jPanel7;
+        jPanels[1][2] = jPanel8;
+        jPanels[1][3] = jPanel9;
+        jPanels[1][4] = jPanel10;
+        
+        jPanels[2][0] = jPanel11;
+        jPanels[2][1] = jPanel12;
+        jPanels[2][2] = jPanel13;
+        jPanels[2][3] = jPanel14;
+        jPanels[2][4] = jPanel15;
+        
+        jPanels[3][0] = jPanel16;
+        jPanels[3][1] = jPanel17;
+        jPanels[3][2] = jPanel18;
+        jPanels[3][3] = jPanel19;
+        jPanels[3][4] = jPanel20;
+        
+        jPanels[4][0] = jPanel21;
+        jPanels[4][1] = jPanel22;
+        jPanels[4][2] = jPanel23;
+        jPanels[4][3] = jPanel24;
+        jPanels[4][4] = jPanel25;   
     }
 
-    public void drawSections(JPanel jp)
+    void drawSections(JPanel jp)
     {
         Graphics g1 = jp.getGraphics();
         
@@ -83,7 +131,7 @@ public class QTableGUI extends javax.swing.JFrame {
         g1.drawLine(jpWidth, 0, 0, jpHeight);
     }
     
-    public void drawPolygons(JPanel jp)
+    void drawPolygons(JPanel jp, float n, float w, float s, float e)
     {
         Graphics g = jp.getGraphics();
         int jpHeight = jp.getHeight();
@@ -115,42 +163,27 @@ public class QTableGUI extends javax.swing.JFrame {
         g.fillPolygon(x3, y3, 3);
         g.setColor(Color.white);
         
-        g.drawString("E", jpWidth / 5, jpHeight / 2);
-        g.drawString("S", jpWidth / 2, 4 * jpHeight / 5);
-        g.drawString("W", 4 * jpWidth / 5, jpHeight / 2);
-        g.drawString("N", jpWidth / 2, jpHeight / 5);
+        g.drawString(String.valueOf(n), jpWidth / 2, 4 * jpHeight / 5);
+        g.drawString(String.valueOf(w), 4 * jpWidth / 5, jpHeight / 2);
+        g.drawString(String.valueOf(s), jpWidth / 2, jpHeight / 5);
+        g.drawString(String.valueOf(e), jpWidth / 5, jpHeight / 2);
         
         g.dispose();
     }
     
     
-    public void drawTable()
+    void drawTable()
     {
-        drawPolygons(jPanel1);
-        drawPolygons(jPanel2);
-        drawPolygons(jPanel3);
-        drawPolygons(jPanel4);
-        drawPolygons(jPanel5);
-        drawPolygons(jPanel6);
-        drawPolygons(jPanel7);
-        drawPolygons(jPanel8);
-        drawPolygons(jPanel9);
-        drawPolygons(jPanel10);
-        drawPolygons(jPanel11);
-        drawPolygons(jPanel12);
-        drawPolygons(jPanel13);
-        drawPolygons(jPanel14);
-        drawPolygons(jPanel15);
-        drawPolygons(jPanel16);
-        drawPolygons(jPanel17);
-        drawPolygons(jPanel18);
-        drawPolygons(jPanel19);
-        drawPolygons(jPanel20);
-        drawPolygons(jPanel21);
-        drawPolygons(jPanel22);
-        drawPolygons(jPanel23);
-        drawPolygons(jPanel24);
-        drawPolygons(jPanel25);
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                drawPolygons(jPanels[i][j], 0.5f, 0.6f, 0.7f, 0.1f);
+            }
+        }   
+    }
+    
+    public void setLocationValues (int i, int j, float north, float west, float south, float east)
+    {
+        drawPolygons(jPanels[i][j], north, west, south, east);
     }
     
     /**
@@ -624,7 +657,7 @@ public class QTableGUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-        drawTable();
+        //drawTable();
     }//GEN-LAST:event_formWindowOpened
 
 //    /**
