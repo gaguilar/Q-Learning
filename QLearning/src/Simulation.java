@@ -380,6 +380,7 @@ public class Simulation {
 
 		Consumer<Simulation> cons = (s) -> s.printQTable();
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
+			boolean firstHundred = i == 100;
 			boolean everyHundred = i != 0 && i % 100 == 0;
 			boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
 			boolean isGoalState = s.currentState.isGoalState();
@@ -387,11 +388,10 @@ public class Simulation {
 			if (firstDropOff)
 				s.firstDropOffFilled = true;
 
-			// if (i > 100) // Didn't realize this was right before I added code
-			// below so comment it out for now
-			// s.randomChance = 0.35; // Change it to Exploit 1
+			 if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be Exploit 1 for i == 100
+				 s.randomChance = 0.35; // Change it to Exploit 1
 
-			return everyHundred || firstDropOff || isGoalState;
+			return firstHundred || everyHundred || firstDropOff || isGoalState;
 		};
 
 		sim.setRandomChance(1.0);
@@ -405,6 +405,47 @@ public class Simulation {
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.35);
 		System.out.println("STEPS TAKEN SECOND RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
+	}
+
+	public static void RunExperiment3(int iterations) {
+		System.out.println("EXPERIMENT 3");
+		Simulation sim = new Simulation(0.3, 0.3, 1.0);
+		Consumer<Simulation> cons = (s) -> s.printQTable();
+		BiPredicate<Simulation, Integer> pred = (s, i) -> {
+			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be Exploit 2 for i == 100
+				s.randomChance = 0.1; // Change it to Exploit 2
+			 
+			return s.currentState.isGoalState();
+		};
+
+		System.out.println("STEPS TAKEN FIRST RUN " + (sim.simulate(iterations, pred, cons)));
+
+		sim.resetFullState();
+
+		sim.setRandomChance(1.0);
+		System.out.println("STEPS TAKEN SECOND RUN " + (sim.simulate(iterations, pred, cons)));
+	}
+
+	public static void RunExperiment4(int iterations) {
+		System.out.println("EXPERIMENT 4");
+		Simulation sim = new Simulation(0.5, 0.3, 1.0);
+		Consumer<Simulation> cons = (s) -> s.printQTable();
+		BiPredicate<Simulation, Integer> pred = (s, i) -> {
+			boolean everyHundred = i != 0 && i % 100 == 0;
+			boolean isGoalState = s.currentState.isGoalState();
+			
+			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be Exploit 2 for i == 100
+				s.randomChance = 0.1; // Change it to Exploit 2
+			 
+			return everyHundred || isGoalState;
+		};
+
+		System.out.println("STEPS TAKEN FIRST RUN " + (sim.simulate(iterations, pred, cons)));
+
+		sim.resetFullState();
+
+		sim.setRandomChance(1.0);
+		System.out.println("STEPS TAKEN SECOND RUN " + (sim.simulate(iterations, pred, cons)));
 	}
 
 	public static void RunExperiment5(int iterations) {
@@ -419,65 +460,20 @@ public class Simulation {
 
 			if (firstDropOff)
 				s.firstDropOffFilled = true;
+			
+			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be Exploit 2 for i == 100
+				s.randomChance = 0.1; // Change it to Exploit 2
 
 			return firstHundred || firstDropOff || isGoalState;
 		};
 
-		sim.setRandomChance(0.1);
-		sim.simulate(100, pred, cons);
-		System.out.println("STEPS TAKEN FIRST RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
+		System.out.println("STEPS TAKEN FIRST RUN " + (sim.simulate(iterations, pred, cons)));
 
 		sim.resetFullState();
 		sim.switchPickUpDropLocations();
 
 		sim.setRandomChance(0.1);
-		sim.simulate(100, pred, cons);
-		System.out.println("STEPS TAKEN SECOND RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
-	}
-
-	public static void RunExperiment3(int iterations) {
-		System.out.println("EXPERIMENT 3");
-		Simulation sim = new Simulation(0.3, 0.3, 1.0);
-		Consumer<Simulation> cons = (s) -> s.printQTable();
-		BiPredicate<Simulation, Integer> pred = (s, i) -> {
-			return s.currentState.isGoalState();
-		};
-
-		sim.setRandomChance(1.0);
-		sim.simulate(100, pred, cons);
-		sim.setRandomChance(0.1);
-		System.out.println("STEPS TAKEN FIRST RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
-
-		sim.resetFullState();
-
-		sim.setRandomChance(1.0);
-		sim.simulate(100, pred, cons);
-		sim.setRandomChance(0.1);
-		System.out.println("STEPS TAKEN SECOND RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
-	}
-
-	public static void RunExperiment4(int iterations) {
-		System.out.println("EXPERIMENT 4");
-		Simulation sim = new Simulation(0.5, 0.3, 1.0);
-		Consumer<Simulation> cons = (s) -> s.printQTable();
-		BiPredicate<Simulation, Integer> pred = (s, i) -> {
-			boolean everyHundred = i != 0 && i % 100 == 0;
-			boolean isGoalState = s.currentState.isGoalState();
-
-			return everyHundred || isGoalState;
-		};
-
-		sim.setRandomChance(1.0);
-		sim.simulate(100, pred, cons);
-		sim.setRandomChance(0.1);
-		System.out.println("STEPS TAKEN FIRST RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
-
-		sim.resetFullState();
-
-		sim.setRandomChance(1.0);
-		sim.simulate(100, pred, cons);
-		sim.setRandomChance(0.1);
-		System.out.println("STEPS TAKEN SECOND RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
+		System.out.println("STEPS TAKEN SECOND RUN " + (sim.simulate(iterations, pred, cons)));
 	}
 
 	public static void RunExperiment6(int iterations) {
@@ -485,13 +481,13 @@ public class Simulation {
 		Simulation sim = new Simulation(0.5, 0.3, 1.0);
 		Consumer<Simulation> cons = (s) -> s.printQTable();
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
+			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be Exploit 1 for i == 100
+				s.randomChance = 0.35; // Change it to Exploit 1
+			
 			return s.currentState.isGoalState();
 		};
 
-		sim.setRandomChance(1.0);
-		sim.simulate(100, pred, cons);
-		sim.setRandomChance(0.35);
-		System.out.println("STEPS TAKEN FIRST RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
+		System.out.println("STEPS TAKEN FIRST RUN " + (sim.simulate(iterations, pred, cons)));
 
 		sim.resetFullState();
 
@@ -504,9 +500,7 @@ public class Simulation {
 		sim.p3c = 5;
 
 		sim.setRandomChance(1.0);
-		sim.simulate(100, pred, cons);
-		sim.setRandomChance(0.35);
-		System.out.println("STEPS TAKEN SECOND RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
+		System.out.println("STEPS TAKEN SECOND RUN " + (sim.simulate(iterations, pred, cons)));
 	}
 
 	public static void main(String[] args) {
