@@ -1,3 +1,5 @@
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -6,6 +8,8 @@ import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
 public class Simulation {
+
+	FileWriter writer;
 
 	Hashtable<State, double[]> qtable;
 	double alpha, gamma;
@@ -21,7 +25,7 @@ public class Simulation {
 
 	FullState currentState;
 
-	public Simulation(double learningRate, double discountRate, double randomChoice) {
+	public Simulation(double learningRate, double discountRate, double randomChoice, String outputFileName) {
 		alpha = learningRate;
 		gamma = discountRate;
 		this.randomChance = randomChoice;
@@ -41,15 +45,20 @@ public class Simulation {
 		p2c = 3;
 		p3r = 5;
 		p3c = 5;
-                
-                
-                for (int i = 1; i <= 5; i++) {
-                    for (int j = 1; j <= 5; j++) {
-                        qtable.put(new State(i, j, 0), new double[6]);
-                        qtable.put(new State(i, j, 1), new double[6]);
-                    }
-                }
-                
+
+		for (int i = 1; i <= 5; i++) {
+			for (int j = 1; j <= 5; j++) {
+				qtable.put(new State(i, j, 0), new double[6]);
+				qtable.put(new State(i, j, 1), new double[6]);
+			}
+		}
+		
+		try {
+			writer = new FileWriter("./QTables/"+outputFileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	/*
@@ -59,7 +68,8 @@ public class Simulation {
 	 */
 	public void updateQTable(QEntry entry) {
 		double oldUtility = getUtility(entry);
-		double newUtility = (1 - alpha) * oldUtility + alpha * (entry.getImmediateReward() + gamma * getMaxUtilityNextMove(applyMove(entry)));
+		double newUtility = (1 - alpha) * oldUtility
+				+ alpha * (entry.getImmediateReward() + gamma * getMaxUtilityNextMove(applyMove(entry)));
 		addQEntry(entry, newUtility);
 	}
 
@@ -116,7 +126,8 @@ public class Simulation {
 	// Q(s, a) look up Q value for being in some state and taking some action.
 	// If a QEntry does not exist add it with a default utility value.
 
-	// for utility array.... [0]=NORTH [1]=SOUTH [2]=EAST [3]=WEST [4]=PICKUP [5]=DROPOFF
+	// for utility array.... [0]=NORTH [1]=SOUTH [2]=EAST [3]=WEST [4]=PICKUP
+	// [5]=DROPOFF
 	public double getUtility(QEntry entry) {
 		if (!qtable.containsKey(entry.s)) {
 			qtable.put(entry.s, new double[6]);
@@ -248,32 +259,81 @@ public class Simulation {
 			return choice;
 		}
 	}
+	
+	public void saveAndCloseOutputFile(){
+		try {
+			writer.flush();
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public void printQTable(int i) {
 		currentState.printFullState();
-                System.out.printf("Iteration: %d\n", i);
-                System.out.printf("Alpha: %f\n", alpha);
-                System.out.printf("Gamma: %f\n", gamma);
-                System.out.printf("Random Chance: %f\n", randomChance);
-                
-		System.out.println("--------------------------------------------------------------------------------------------------");
-                System.out.println("State\t| NORTH\t\t| SOUTH\t\t| EAST\t\t| WEST\t\t| PICKUP\t| DROPOFF");
-		System.out.println("--------------------------------------------------------------------------------------------------");
+		System.out.printf("Iteration: %d\n", i);
+		System.out.printf("Alpha: %f\n", alpha);
+		System.out.printf("Gamma: %f\n", gamma);
+		System.out.printf("Random Chance: %f\n", randomChance);
+
+		System.out.println(
+				"--------------------------------------------------------------------------------------------------");
+		System.out.println("State\t| NORTH\t\t| SOUTH\t\t| EAST\t\t| WEST\t\t| PICKUP\t| DROPOFF");
+		System.out.println(
+				"--------------------------------------------------------------------------------------------------");
 		List<State> entries = new ArrayList<>(qtable.keySet());
 		entries.stream().sorted((qe1, qe2) -> qe1.compareByCol(qe2)).sorted((qe1, qe2) -> qe1.compareByRow(qe2))
-				.sorted((qe1, qe2) -> qe1.compareByBlock(qe2))
-				.forEach((e) -> {
-					System.out.printf("%s\t| %+08.4f\t| %+08.4f\t| %+08.4f\t| %+08.4f\t| %+08.4f\t| %+08.4f\n",e,qtable.get(e)[0],qtable.get(e)[1],qtable.get(e)[2],qtable.get(e)[3],qtable.get(e)[4],qtable.get(e)[5]);
-					if(e.agentRow==5 && e.agentCol==5 && e.hasBlock ==0){
+				.sorted((qe1, qe2) -> qe1.compareByBlock(qe2)).forEach((e) -> {
+					System.out.printf("%s\t| %+08.4f\t| %+08.4f\t| %+08.4f\t| %+08.4f\t| %+08.4f\t| %+08.4f\n", e,
+							qtable.get(e)[0], qtable.get(e)[1], qtable.get(e)[2], qtable.get(e)[3], qtable.get(e)[4],
+							qtable.get(e)[5]);
+					if (e.agentRow == 5 && e.agentCol == 5 && e.hasBlock == 0) {
 						System.out.println();
-                                                System.out.println("--------------------------------------------------------------------------------------------------");
+						System.out.println(
+								"--------------------------------------------------------------------------------------------------");
 						System.out.println("State\t| NORTH\t\t| SOUTH\t\t| EAST\t\t| WEST\t\t| PICKUP\t| DROPOFF");
-						System.out.println("--------------------------------------------------------------------------------------------------");
+						System.out.println(
+								"--------------------------------------------------------------------------------------------------");
 					}
 				});
 		System.out.println();
+
+		try {
+			saveQTableCSV(writer, i);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 	}
-        
+
+	public void saveQTableCSV(FileWriter writer, int i) throws IOException {
+		writer.append(currentState.toString() + "\n");
+		writer.append("Iteration: " + i + "\n");
+		writer.append("Learning Rate: " + alpha + "\n");
+		writer.append("Discount Rate: " + gamma + "\n");
+		writer.append("Random Chance: " + randomChance + "\n");
+		writer.append("State, NORTH, SOUTH, EAST, WEST, PICKUP, DROPOFF\n");
+		List<State> entries = new ArrayList<>(qtable.keySet());
+		entries.stream().sorted((qe1, qe2) -> qe1.compareByCol(qe2)).sorted((qe1, qe2) -> qe1.compareByRow(qe2))
+				.sorted((qe1, qe2) -> qe1.compareByBlock(qe2)).forEach((e) -> {
+					String line = String.format("%s,%+08.4f,%+08.4f,%+08.4f,%+08.4f,%+08.4f,%+08.4f\n", e,
+							qtable.get(e)[0], qtable.get(e)[1], qtable.get(e)[2], qtable.get(e)[3], qtable.get(e)[4],
+							qtable.get(e)[5]);
+					try {
+						writer.append(line);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+					if (e.agentRow == 5 && e.agentCol == 5 && e.hasBlock == 0) {
+						try {
+							writer.append("\nState, NORTH, SOUTH, EAST, WEST, PICKUP, DROPOFF\n");
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+					}
+				});
+		writer.write("\n");
+	}
+
 	public ArrayList<QEntry> getValidMoves(State state) {
 		ArrayList<QEntry> moves = new ArrayList<QEntry>();
 		int row = state.agentRow;
@@ -330,7 +390,7 @@ public class Simulation {
 			double bestGamma = 0.0;
 			for (double alpha = 0.1; alpha < 1.0; alpha += 0.1) {
 				for (double gamma = 0.1; gamma < 1.0; gamma += 0.1) {
-					Simulation sim = new Simulation(alpha, gamma, randomChoice);
+					Simulation sim = new Simulation(alpha, gamma, randomChoice, "RandomTest.csv");
 					int iterations = 0;
 					for (int i = 0; i < 10000; i++) {
 						boolean finished = sim.step();
@@ -344,6 +404,7 @@ public class Simulation {
 						bestAlpha = alpha;
 						bestGamma = gamma;
 					}
+					sim.saveAndCloseOutputFile();
 				}
 			}
 			System.out.printf("Best performance: alpha: %1.1f gamma: %1.1f with iterations: %d\n", bestAlpha, bestGamma,
@@ -371,17 +432,17 @@ public class Simulation {
 
 	public static void RunExperiment1(int iterations) {
 		System.out.println("EXPERIMENT 1");
-		Simulation sim = new Simulation(0.3, 0.3, 1.0);
+		Simulation sim = new Simulation(0.3, 0.3, 1.0, "Experiment1.csv");
 
-		BiConsumer<Simulation, Integer> cons = (s,i) -> s.printQTable(i);
+		BiConsumer<Simulation, Integer> cons = (s, i) -> s.printQTable(i);
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
 			boolean firstHundred = i == 100;
 			boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
 			boolean isGoalState = s.currentState.isGoalState();
 
-			if (firstDropOff){
+			if (firstDropOff) {
 				s.firstDropOffFilled = true;
-                        }
+			}
 
 			return firstHundred || firstDropOff || isGoalState;
 		};
@@ -389,13 +450,14 @@ public class Simulation {
 		System.out.println("STEPS TAKEN FIRST RUN " + sim.simulate(iterations, pred, cons) + "\n");
 		sim.resetFullState();
 		System.out.println("STEPS TAKEN SECOND RUN " + sim.simulate(iterations, pred, cons) + "\n");
+		sim.saveAndCloseOutputFile();
 	}
 
 	public static void RunExperiment2(int iterations) {
 		System.out.println("EXPERIMENT 2");
-		Simulation sim = new Simulation(0.3, 0.3, 1.0);
+		Simulation sim = new Simulation(0.3, 0.3, 1.0, "Experiment2.csv");
 
-		BiConsumer<Simulation, Integer> cons = (s,i) -> s.printQTable(i);
+		BiConsumer<Simulation, Integer> cons = (s, i) -> s.printQTable(i);
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
 			boolean firstHundred = i == 100;
 			boolean everyHundred = i != 0 && i % 100 == 0;
@@ -404,9 +466,10 @@ public class Simulation {
 
 			if (firstDropOff)
 				s.firstDropOffFilled = true;
-                        
-			 if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be Exploit 1 for i == 100
-				 s.randomChance = 0.35; // Change it to Exploit 1
+
+			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be
+							// Exploit 1 for i == 100
+				s.randomChance = 0.35; // Change it to Exploit 1
 
 			return firstHundred || everyHundred || firstDropOff || isGoalState;
 		};
@@ -421,17 +484,21 @@ public class Simulation {
 		sim.setRandomChance(1.0);
 		sim.simulate(100, pred, cons);
 		sim.setRandomChance(0.35);
-		System.out.println("STEPS TAKEN SECOND RUN " + (100 + sim.simulate(iterations - 100, pred, cons)));
+		int totalSteps = 100 + sim.simulate(iterations - 100, pred, cons);
+
+		System.out.println("STEPS TAKEN SECOND RUN " + totalSteps);
+		sim.saveAndCloseOutputFile();
 	}
 
 	public static void RunExperiment3(int iterations) {
 		System.out.println("EXPERIMENT 3");
-		Simulation sim = new Simulation(0.3, 0.3, 1.0);
-		BiConsumer<Simulation, Integer> cons = (s,i) -> s.printQTable(i);
+		Simulation sim = new Simulation(0.3, 0.3, 1.0, "Experiment3.csv");
+		BiConsumer<Simulation, Integer> cons = (s, i) -> s.printQTable(i);
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
-			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be Exploit 2 for i == 100
+			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be
+							// Exploit 2 for i == 100
 				s.randomChance = 0.1; // Change it to Exploit 2
-			 
+
 			return s.currentState.isGoalState();
 		};
 
@@ -441,19 +508,21 @@ public class Simulation {
 
 		sim.setRandomChance(1.0);
 		System.out.println("STEPS TAKEN SECOND RUN " + (sim.simulate(iterations, pred, cons)));
+		sim.saveAndCloseOutputFile();
 	}
 
 	public static void RunExperiment4(int iterations) {
 		System.out.println("EXPERIMENT 4");
-		Simulation sim = new Simulation(0.5, 0.3, 1.0);
-		BiConsumer<Simulation, Integer> cons = (s,i) -> s.printQTable(i);
+		Simulation sim = new Simulation(0.5, 0.3, 1.0, "Experiment4.csv");
+		BiConsumer<Simulation, Integer> cons = (s, i) -> s.printQTable(i);
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
 			boolean everyHundred = i != 0 && i % 100 == 0;
 			boolean isGoalState = s.currentState.isGoalState();
-			
-			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be Exploit 2 for i == 100
+
+			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be
+							// Exploit 2 for i == 100
 				s.randomChance = 0.1; // Change it to Exploit 2
-			 
+
 			return everyHundred || isGoalState;
 		};
 
@@ -463,13 +532,14 @@ public class Simulation {
 
 		sim.setRandomChance(1.0);
 		System.out.println("STEPS TAKEN SECOND RUN " + (sim.simulate(iterations, pred, cons)));
+		sim.saveAndCloseOutputFile();
 	}
 
 	public static void RunExperiment5(int iterations) {
 		System.out.println("EXPERIMENT 5");
-		Simulation sim = new Simulation(0.5, 0.3, 0.1);
+		Simulation sim = new Simulation(0.5, 0.3, 0.1, "Experiment5.csv");
 
-		BiConsumer<Simulation, Integer> cons = (s,i) -> s.printQTable(i);
+		BiConsumer<Simulation, Integer> cons = (s, i) -> s.printQTable(i);
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
 			boolean firstHundred = i == 100;
 			boolean firstDropOff = s.exactlyOneDropOffFilled() && !s.firstDropOffFilled;
@@ -477,8 +547,9 @@ public class Simulation {
 
 			if (firstDropOff)
 				s.firstDropOffFilled = true;
-			
-			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be Exploit 2 for i == 100
+
+			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be
+							// Exploit 2 for i == 100
 				s.randomChance = 0.1; // Change it to Exploit 2
 
 			return firstHundred || firstDropOff || isGoalState;
@@ -491,16 +562,18 @@ public class Simulation {
 
 		sim.setRandomChance(0.1);
 		System.out.println("STEPS TAKEN SECOND RUN " + (sim.simulate(iterations, pred, cons)));
+		sim.saveAndCloseOutputFile();
 	}
 
 	public static void RunExperiment6(int iterations) {
 		System.out.println("EXPERIMENT 6");
-		Simulation sim = new Simulation(0.5, 0.3, 1.0);
-		BiConsumer<Simulation, Integer> cons = (s,i) -> s.printQTable(i);
+		Simulation sim = new Simulation(0.5, 0.3, 1.0, "Experiment6.csv");
+		BiConsumer<Simulation, Integer> cons = (s, i) -> s.printQTable(i);
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
-			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be Exploit 1 for i == 100
+			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be
+							// Exploit 1 for i == 100
 				s.randomChance = 0.35; // Change it to Exploit 1
-			
+
 			return s.currentState.isGoalState();
 		};
 
@@ -518,21 +591,22 @@ public class Simulation {
 
 		sim.setRandomChance(1.0);
 		System.out.println("STEPS TAKEN SECOND RUN " + (sim.simulate(iterations, pred, cons)));
+		sim.saveAndCloseOutputFile();
 	}
 
 	public static void main(String[] args) {
 		int iterations = 10000;
-                
-                //QTableGUI qTableGUI = QTableGUI.GetQTableGUI();
-                //qTableGUI.setVisible(true);
-                
+
+		// QTableGUI qTableGUI = QTableGUI.GetQTableGUI();
+		// qTableGUI.setVisible(true);
+
 		RunExperiment1(iterations);
 		RunExperiment2(iterations);
-		RunExperiment3(iterations);
+		RunExperiment3(iterations); 
 		RunExperiment4(iterations);
-		RunExperiment5(iterations);
+		RunExperiment5(iterations); 
 		RunExperiment6(iterations);
-                
-                //qTableGUI.setLocationValues(0, 0, 0.1f, 0.1f, 0.1f, 0.1f);
+
+		// qTableGUI.setLocationValues(0, 0, 0.1f, 0.1f, 0.1f, 0.1f);
 	}
 }
