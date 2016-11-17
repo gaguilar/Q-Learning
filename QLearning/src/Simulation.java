@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,6 +7,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
+
+import javax.swing.JOptionPane;
 
 public class Simulation {
 
@@ -54,7 +57,10 @@ public class Simulation {
 		}
 		
 		try {
-			writer = new FileWriter("./QTables/"+outputFileName);
+			File dir = new File("./QTableOutput");
+			if(!dir.exists())
+				dir.mkdir();
+			writer = new FileWriter(dir.getName()+"/"+outputFileName);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -424,8 +430,7 @@ public class Simulation {
 				|| (currentState.d1 != 5 && currentState.d2 == 5 && currentState.d3 == 5);
 	}
 
-	public static void PrintExperiment(Simulation sim, int i, BiPredicate<Simulation, Integer> pred,
-			BiConsumer<Simulation, Integer> cons) {
+	public static void PrintExperiment(Simulation sim, int i, BiPredicate<Simulation, Integer> pred, BiConsumer<Simulation, Integer> cons) {
 		if (pred.test(sim, i))
 			cons.accept(sim, i);
 	}
@@ -609,6 +614,8 @@ public class Simulation {
 		RunExperiment4(iterations);
 		RunExperiment5(iterations); 
 		RunExperiment6(iterations);
+		
+		JOptionPane.showMessageDialog(null, "Experiments complete.\nSee output files.");
 
 		// qTableGUI.setLocationValues(0, 0, 0.1f, 0.1f, 0.1f, 0.1f);
 	}
