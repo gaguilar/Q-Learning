@@ -41,6 +41,15 @@ public class Simulation {
 		p2c = 3;
 		p3r = 5;
 		p3c = 5;
+                
+                
+                for (int i = 1; i <= 5; i++) {
+                    for (int j = 1; j <= 5; j++) {
+                        qtable.put(new State(i, j, 0), new double[6]);
+                        qtable.put(new State(i, j, 1), new double[6]);
+                    }
+                }
+                
 	}
 
 	/*
@@ -394,7 +403,7 @@ public class Simulation {
 
 			if (firstDropOff)
 				s.firstDropOffFilled = true;
-
+                        
 			 if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be Exploit 1 for i == 100
 				 s.randomChance = 0.35; // Change it to Exploit 1
 
