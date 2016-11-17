@@ -7,13 +7,16 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
 public class Simulation {
 
 	FileWriter writer;
-
+        QTableGUI qTableGUI;
+        
 	Hashtable<State, double[]> qtable;
 	double alpha, gamma;
 	double randomChance;
@@ -29,7 +32,7 @@ public class Simulation {
 	FullState currentState;
 
 	public Simulation(double learningRate, double discountRate, double randomChoice, String outputFileName) {
-		alpha = learningRate;
+                alpha = learningRate;
 		gamma = discountRate;
 		this.randomChance = randomChoice;
 		qtable = new Hashtable<State, double[]>();
@@ -64,7 +67,8 @@ public class Simulation {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+                
+                qTableGUI = new QTableGUI();
 	}
 
 	/*
@@ -275,6 +279,25 @@ public class Simulation {
 		}
 	}
 
+        public void showQTableGUI(int experimentNumber, int finalIterations)
+        {
+            qTableGUI.setQTableMetaData(experimentNumber, alpha, gamma, currentState, finalIterations, randomChance);
+            qTableGUI.setVisible(true);
+            
+            
+            List<State> entries = new ArrayList<>(qtable.keySet());
+            entries.stream().forEach((e) -> {
+                double[] vals = qtable.get(e);
+                qTableGUI.setLocationValues(e.agentRow, e.agentCol, vals[0], vals[3], vals[1], vals[2]);
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
+            
+        }
+        
 	public void printQTable(int i) {
 		currentState.printFullState();
 		System.out.printf("Iteration: %d\n", i);
@@ -454,8 +477,10 @@ public class Simulation {
 
 		System.out.println("STEPS TAKEN FIRST RUN " + sim.simulate(iterations, pred, cons) + "\n");
 		sim.resetFullState();
-		System.out.println("STEPS TAKEN SECOND RUN " + sim.simulate(iterations, pred, cons) + "\n");
+                int finalIterations = sim.simulate(iterations, pred, cons);
+		System.out.println("STEPS TAKEN SECOND RUN " + finalIterations + "\n");
 		sim.saveAndCloseOutputFile();
+                sim.showQTableGUI(1, finalIterations);
 	}
 
 	public static void RunExperiment2(int iterations) {
@@ -493,6 +518,7 @@ public class Simulation {
 
 		System.out.println("STEPS TAKEN SECOND RUN " + totalSteps);
 		sim.saveAndCloseOutputFile();
+                sim.showQTableGUI(2, totalSteps);
 	}
 
 	public static void RunExperiment3(int iterations) {
@@ -512,8 +538,10 @@ public class Simulation {
 		sim.resetFullState();
 
 		sim.setRandomChance(1.0);
-		System.out.println("STEPS TAKEN SECOND RUN " + (sim.simulate(iterations, pred, cons)));
+                int totalSteps = (sim.simulate(iterations, pred, cons));
+		System.out.println("STEPS TAKEN SECOND RUN " + totalSteps);
 		sim.saveAndCloseOutputFile();
+                sim.showQTableGUI(3, totalSteps);
 	}
 
 	public static void RunExperiment4(int iterations) {
@@ -536,8 +564,10 @@ public class Simulation {
 		sim.resetFullState();
 
 		sim.setRandomChance(1.0);
-		System.out.println("STEPS TAKEN SECOND RUN " + (sim.simulate(iterations, pred, cons)));
+                int totalSteps = (sim.simulate(iterations, pred, cons));
+		System.out.println("STEPS TAKEN SECOND RUN " + totalSteps);
 		sim.saveAndCloseOutputFile();
+                sim.showQTableGUI(4, totalSteps);
 	}
 
 	public static void RunExperiment5(int iterations) {
@@ -569,8 +599,10 @@ public class Simulation {
 		sim.resetFullState();
 		sim.setRandomChance(1.0);
 		sim.switchPickUpDropLocations();
-		System.out.println("STEPS TAKEN THIRD RUN " + (sim.simulate(iterations, pred, cons)));
+                int totalSteps = (sim.simulate(iterations, pred, cons));
+		System.out.println("STEPS TAKEN THIRD RUN " + totalSteps);
 		sim.saveAndCloseOutputFile();
+                sim.showQTableGUI(5, totalSteps);
 	}
 
 	public static void RunExperiment6(int iterations) {
@@ -598,16 +630,14 @@ public class Simulation {
 		sim.p3c = 5;
 
 		sim.setRandomChance(1.0);
-		System.out.println("STEPS TAKEN SECOND RUN " + (sim.simulate(iterations, pred, cons)));
+                int totalSteps = (sim.simulate(iterations, pred, cons));
+		System.out.println("STEPS TAKEN SECOND RUN " + totalSteps);
 		sim.saveAndCloseOutputFile();
+                sim.showQTableGUI(6, totalSteps);
 	}
 
 	public static void main(String[] args) {
 		int iterations = 10000;
-
-		// QTableGUI qTableGUI = QTableGUI.GetQTableGUI();
-		// qTableGUI.setVisible(true);
-
 		RunExperiment1(iterations);
 		RunExperiment2(iterations);
 		RunExperiment3(iterations); 
@@ -616,7 +646,5 @@ public class Simulation {
 		RunExperiment6(iterations);
 		
 		JOptionPane.showMessageDialog(null, "Experiments complete.\nSee output files.");
-
-		// qTableGUI.setLocationValues(0, 0, 0.1f, 0.1f, 0.1f, 0.1f);
 	}
 }
