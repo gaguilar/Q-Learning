@@ -537,7 +537,7 @@ public class Simulation {
 
 	public static void RunExperiment5(int iterations) {
 		System.out.println("EXPERIMENT 5");
-		Simulation sim = new Simulation(0.5, 0.3, 0.1, "Experiment5.csv");
+		Simulation sim = new Simulation(0.5, 0.3, 1.0, "Experiment5.csv");
 
 		BiConsumer<Simulation, Integer> cons = (s, i) -> s.printQTable(i);
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
@@ -558,10 +558,13 @@ public class Simulation {
 		System.out.println("STEPS TAKEN FIRST RUN " + (sim.simulate(iterations, pred, cons)));
 
 		sim.resetFullState();
-		sim.switchPickUpDropLocations();
-
-		sim.setRandomChance(0.1);
+		sim.setRandomChance(1.0);
 		System.out.println("STEPS TAKEN SECOND RUN " + (sim.simulate(iterations, pred, cons)));
+		
+		sim.resetFullState();
+		sim.setRandomChance(1.0);
+		sim.switchPickUpDropLocations();
+		System.out.println("STEPS TAKEN THIRD RUN " + (sim.simulate(iterations, pred, cons)));
 		sim.saveAndCloseOutputFile();
 	}
 
