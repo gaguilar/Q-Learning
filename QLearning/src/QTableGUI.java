@@ -150,33 +150,35 @@ public class QTableGUI extends javax.swing.JFrame {
     
     void drawPolygons(JPanel jp, float n, float w, float s, float e)
     {
+    	float max = Math.max(n, Math.max(w, Math.max(s, e)));
+    	
         Graphics g = jp.getGraphics();
         int jpHeight = jp.getHeight();
         int jpWidth = jp.getWidth();
         
         int [ ] x0 = {0, jpWidth / 2, 0}; 
         int [ ] y0 = {0, jpHeight / 2, jpHeight}; 
-        g.setColor(Color.red);
+        g.setColor(/*max == n ? Color.green : */Color.red);
         g.fillPolygon(x0, y0, 3);
-        g.setColor(Color.white);
+//        g.setColor(Color.white);
         
         
         int [ ] x1 = {0, jpWidth / 2, jpWidth}; 
         int [ ] y1 = {jpHeight, jpHeight / 2, jpHeight}; 
-        g.setColor(Color.black);
+        g.setColor(/*max == w ? Color.green : */Color.black);
         g.fillPolygon(x1, y1, 3);
-        g.setColor(Color.white);
+//        g.setColor(Color.white);
         
         int [ ] x2 = {jpWidth, jpWidth / 2, jpWidth}; 
         int [ ] y2 = {0, jpHeight / 2, jpHeight}; 
-        g.setColor(Color.red);
+        g.setColor(/*max == s ? Color.green : */Color.red);
         g.fillPolygon(x2, y2, 3);
-        g.setColor(Color.white);
+//        g.setColor(Color.white);
         
         
         int [ ] x3 = {0, jpWidth / 2, jpWidth}; 
         int [ ] y3 = {0, jpHeight / 2, 0}; 
-        g.setColor(Color.black);
+        g.setColor(/*max == e ? Color.green : */Color.black);
         g.fillPolygon(x3, y3, 3);
         g.setColor(Color.white);
         
@@ -199,13 +201,8 @@ public class QTableGUI extends javax.swing.JFrame {
     }
     
     public void setLocationValues (int i, int j, double north, double west, double south, double east)
-    {
-        float n = (float) north;
-        float w = (float) west;
-        float s = (float) south;
-        float e = (float) east;
-        
-        drawPolygons(jPanels[i-1][j-1], n,w,s,e);
+    {   
+        drawPolygons(jPanels[i-1][j-1], (float)north,(float)west,(float)south,(float)east);
     }
     
     /**

@@ -286,15 +286,17 @@ public class Simulation {
             qTableGUI.setVisible(true);
             
             List<State> entries = new ArrayList<>(qtable.keySet());
-            entries.stream().forEach((e) -> {
-                double[] vals = qtable.get(e);
-                qTableGUI.setLocationValues(e.agentRow, e.agentCol, vals[0], vals[3], vals[1], vals[2]);
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            });
+            entries.stream()
+            /*.filter((e) -> e.hasBlock == 1)*/
+	            .forEach((e) -> {
+	                double[] vals = qtable.get(e);
+	                qTableGUI.setLocationValues(e.agentRow, e.agentCol, vals[0], vals[3], vals[1], vals[2]);
+	                try {
+	                    Thread.sleep(50);
+	                } catch (InterruptedException ex) {
+	                    Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+	                }
+	            });
             
         }
         
