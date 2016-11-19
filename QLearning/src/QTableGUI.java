@@ -243,49 +243,49 @@ public class QTableGUI extends javax.swing.JFrame {
         int jpHeight = jp.getHeight();
         int jpWidth = jp.getWidth();
         
-        // East
+        // West
         int [ ] x0 = {0, jpWidth / 2, 0}; 
         int [ ] y0 = {0, jpHeight / 2, jpHeight}; 
-        if (d == Direction.East || d == Direction.NorthEast || d == Direction.SouthEast)
-            g.setColor(Color.black);
-        else 
-            g.setColor(max == e ? Color.red : Color.black);
-        g.fillPolygon(x0, y0, 3);
-        
-        // North
-        int [ ] x1 = {0, jpWidth / 2, jpWidth}; 
-        int [ ] y1 = {jpHeight, jpHeight / 2, jpHeight}; 
-        if (d == Direction.North || d == Direction.NorthEast || d == Direction.NorthWest)
-            g.setColor(Color.black);
-        else 
-            g.setColor(max == n ? Color.red : Color.black);
-        g.fillPolygon(x1, y1, 3);
-        
-        // West
-        int [ ] x2 = {jpWidth, jpWidth / 2, jpWidth}; 
-        int [ ] y2 = {0, jpHeight / 2, jpHeight}; 
         if (d == Direction.West || d == Direction.NorthWest || d == Direction.SouthWest)
             g.setColor(Color.black);
         else 
             g.setColor(max == w ? Color.red : Color.black);
-        g.fillPolygon(x2, y2, 3);
+        g.fillPolygon(x0, y0, 3);
         
         // South
-        int [ ] x3 = {0, jpWidth / 2, jpWidth}; 
-        int [ ] y3 = {0, jpHeight / 2, 0}; 
+        int [ ] x1 = {0, jpWidth / 2, jpWidth}; 
+        int [ ] y1 = {jpHeight, jpHeight / 2, jpHeight}; 
         if (d == Direction.South || d == Direction.SouthEast || d == Direction.SouthWest)
             g.setColor(Color.black);
         else 
             g.setColor(max == s ? Color.red : Color.black);
+        g.fillPolygon(x1, y1, 3);
+        
+        // East
+        int [ ] x2 = {jpWidth, jpWidth / 2, jpWidth}; 
+        int [ ] y2 = {0, jpHeight / 2, jpHeight}; 
+        if (d == Direction.East || d == Direction.NorthEast || d == Direction.SouthEast)
+            g.setColor(Color.black);
+        else 
+            g.setColor(max == e ? Color.red : Color.black);
+        g.fillPolygon(x2, y2, 3);
+        
+        // North
+        int [ ] x3 = {0, jpWidth / 2, jpWidth}; 
+        int [ ] y3 = {0, jpHeight / 2, 0}; 
+        if (d == Direction.North || d == Direction.NorthEast || d == Direction.NorthWest)
+            g.setColor(Color.black);
+        else 
+            g.setColor(max == n ? Color.red : Color.black);
         g.fillPolygon(x3, y3, 3);
         
         g.setColor(Color.white);
         
         g.setFont(new Font(g.getFont().getFontName(), Font.PLAIN, 10)); 
-        g.drawString(String.format("%+04.4f", s), (jpWidth / 2) - 21, jpHeight / 5);
-        g.drawString(String.format("%+04.4f", e), (jpWidth / 5) - 21, jpHeight / 2);
-        g.drawString(String.format("%+04.4f", n), (jpWidth / 2) - 21 , 4 * jpHeight / 5);
-        g.drawString(String.format("%+04.4f", w), (4 * jpWidth / 5) - 21, jpHeight / 2);
+        g.drawString(String.format("%+04.4f", n), (jpWidth / 2) - 21, jpHeight / 5);
+        g.drawString(String.format("%+04.4f", w), (jpWidth / 5) - 21, jpHeight / 2);
+        g.drawString(String.format("%+04.4f", s), (jpWidth / 2) - 21 , 4 * jpHeight / 5);
+        g.drawString(String.format("%+04.4f", e), (4 * jpWidth / 5) - 21, jpHeight / 2);
         
         g.dispose();
     }
@@ -297,14 +297,14 @@ public class QTableGUI extends javax.swing.JFrame {
             for (int j = 1; j <= 5; j++) {
                 
                 Direction d = Direction.None;
-                if(i == 1 && j == 1) d = Direction.SouthEast;
-                else if(i == 1 && j == 5) d = Direction.SouthWest;
-                else if(i == 5 && j == 1) d = Direction.NorthEast;
-                else if(i == 5 && j == 5) d = Direction.NorthWest;
-                else if(i == 1 && j != 1 && j != 5) d = Direction.South;
-                else if(i == 5 && j != 1 && j != 5) d = Direction.North;
-                else if(j == 1 && i != 1 && i != 5) d = Direction.East;
-                else if(j == 5 && i != 1 && i != 5) d = Direction.West;
+                if(i == 1 && j == 1)      d = Direction.NorthWest; //SouthEast;
+                else if(i == 1 && j == 5) d = Direction.NorthEast;//SouthWest;
+                else if(i == 5 && j == 1) d = Direction.SouthWest;//NorthEast;
+                else if(i == 5 && j == 5) d = Direction.SouthEast;//NorthWest;
+                else if(i == 1 && j != 1 && j != 5) d = Direction.North;//South;
+                else if(i == 5 && j != 1 && j != 5) d = Direction.South;//North;
+                else if(j == 1 && i != 1 && i != 5) d = Direction.West;//East;
+                else if(j == 5 && i != 1 && i != 5) d = Direction.East;//West;
                 
                 //System.out.println("i = " + i + "; j = " + j + "; direction -> " + d.toString());
                 
@@ -316,15 +316,16 @@ public class QTableGUI extends javax.swing.JFrame {
     
     public void setLocationValues (int i, int j, double north, double west, double south, double east, int tableState)
     {   
+
         Direction d = Direction.None;
-        if(i == 1 && j == 1) d = Direction.SouthEast;
-        else if(i == 1 && j == 5) d = Direction.SouthWest;
-        else if(i == 5 && j == 1) d = Direction.NorthEast;
-        else if(i == 5 && j == 5) d = Direction.NorthWest;
-        else if(i == 1 && j != 1 && j != 5) d = Direction.South;
-        else if(i == 5 && j != 1 && j != 5) d = Direction.North;
-        else if(j == 1 && i != 1 && i != 5) d = Direction.East;
-        else if(j == 5 && i != 1 && i != 5) d = Direction.West;
+        if(i == 1 && j == 1)      d = Direction.NorthWest; //SouthEast;
+        else if(i == 1 && j == 5) d = Direction.NorthEast;//SouthWest;
+        else if(i == 5 && j == 1) d = Direction.SouthWest;//NorthEast;
+        else if(i == 5 && j == 5) d = Direction.SouthEast;//NorthWest;
+        else if(i == 1 && j != 1 && j != 5) d = Direction.North;//South;
+        else if(i == 5 && j != 1 && j != 5) d = Direction.South;//North;
+        else if(j == 1 && i != 1 && i != 5) d = Direction.West;//East;
+        else if(j == 5 && i != 1 && i != 5) d = Direction.East;//West;
 
         //System.out.println("i = " + i + "; j = " + j + "; direction -> " + d.toString());
 
