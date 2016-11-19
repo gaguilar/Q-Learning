@@ -21,7 +21,8 @@ public class Simulation {
 	double alpha, gamma;
 	double randomChance;
 
-	public int p1r, p1c, p2r, p2c, p3r, p3c, d1r, d1c, d2r, d2c, d3r, d3c;
+	public int p1r, p1c, p2r, p2c, p3r, p3c; // Pickup locations by rows and cols
+        public int d1r, d1c, d2r, d2c, d3r, d3c; // Dropoff locations by rows and cols
 
 	boolean firstDropOffFilled, secondDropOffFilled;
 
@@ -290,7 +291,7 @@ public class Simulation {
                     .filter((e) -> {
                         boolean processLocation = false;
                         
-                        if(e.hasBlock == 1)
+                        if(e.hasBlock == 0)
                         {
                             boolean p1 = e.agentRow == 1 && e.agentCol == 1;
                             boolean p2 = e.agentRow == 3 && e.agentCol == 3;
@@ -672,12 +673,12 @@ public class Simulation {
 
 	public static void main(String[] args) {
 		int iterations = 10000;
-		RunExperiment1(iterations);
-		RunExperiment2(iterations);
+//		RunExperiment1(iterations);
+//		RunExperiment2(iterations);
 		RunExperiment3(iterations); 
-		RunExperiment4(iterations);
-		RunExperiment5(iterations); 
-		RunExperiment6(iterations);
+//		RunExperiment4(iterations);
+//		RunExperiment5(iterations); 
+//		RunExperiment6(iterations);
 		
 		JOptionPane.showMessageDialog(null, "Experiments complete.\nSee output files.");
 	}
