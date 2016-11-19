@@ -63,9 +63,9 @@ public class QTableGUI extends javax.swing.JFrame {
     {
         String title = String.format("Experiment %d", experimentNumber);
         String steps = String.format("Iterations: %d", iterations);
-        String alphaStr = String.format("Alpha: %f", alpha);
-        String gammaStr = String.format("Alpha: %f", gamma);
-        String randChce = String.format("Random Choice: %f", randomChance);
+        String alphaStr = String.format("Alpha: %1.2f", alpha);
+        String gammaStr = String.format("Gamma: %1.2f", gamma);
+        String randChce = String.format("Random Choice: %1.2f", randomChance);
         
         jLabel1.setText(title);
         jLabel2.setText(steps);

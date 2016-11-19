@@ -15,14 +15,16 @@ import javax.swing.JOptionPane;
 public class Simulation {
 
 	FileWriter writer;
-        QTableGUI qTableGUI;
-        
+	QTableGUI qTableGUI;
+
 	Hashtable<State, double[]> qtable;
 	double alpha, gamma;
 	double randomChance;
 
-	public int p1r, p1c, p2r, p2c, p3r, p3c; // Pickup locations by rows and cols
-        public int d1r, d1c, d2r, d2c, d3r, d3c; // Dropoff locations by rows and cols
+	public int p1r, p1c, p2r, p2c, p3r, p3c; // Pickup locations by rows and
+												// cols
+	public int d1r, d1c, d2r, d2c, d3r, d3c; // Dropoff locations by rows and
+												// cols
 
 	boolean firstDropOffFilled, secondDropOffFilled;
 
@@ -33,7 +35,7 @@ public class Simulation {
 	FullState currentState;
 
 	public Simulation(double learningRate, double discountRate, double randomChoice, String outputFileName) {
-                alpha = learningRate;
+		alpha = learningRate;
 		gamma = discountRate;
 		this.randomChance = randomChoice;
 		qtable = new Hashtable<State, double[]>();
@@ -59,17 +61,17 @@ public class Simulation {
 				qtable.put(new State(i, j, 1), new double[6]);
 			}
 		}
-		
+
 		try {
 			File dir = new File("./QTableOutput");
-			if(!dir.exists())
+			if (!dir.exists())
 				dir.mkdir();
-			writer = new FileWriter(dir.getName()+"/"+outputFileName);
+			writer = new FileWriter(dir.getName() + "/" + outputFileName);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-                
-                qTableGUI = new QTableGUI();
+
+		qTableGUI = new QTableGUI();
 	}
 
 	/*
@@ -270,8 +272,8 @@ public class Simulation {
 			return choice;
 		}
 	}
-	
-	public void saveAndCloseOutputFile(){
+
+	public void saveAndCloseOutputFile() {
 		try {
 			writer.flush();
 			writer.close();
@@ -280,59 +282,51 @@ public class Simulation {
 		}
 	}
 
-        public void showQTableGUI(int experimentNumber, int finalIterations)
-        {
-            qTableGUI.setQTableMetaData(experimentNumber, alpha, gamma, currentState, finalIterations, randomChance);
-            qTableGUI.setLocationRelativeTo(null);
-            qTableGUI.setVisible(true);
-            
-            List<State> entries = new ArrayList<>(qtable.keySet());
-            entries.stream()
-                    .filter((e) -> {
-                        boolean processLocation = false;
-                        
-                        if(e.hasBlock == 0)
-                        {
-                            boolean p1 = e.agentRow == 1 && e.agentCol == 1;
-                            boolean p2 = e.agentRow == 3 && e.agentCol == 3;
-                            boolean p3 = e.agentRow == 5 && e.agentCol == 5;
-                            processLocation = !(p1 || p2 || p3);
-                        }
-                        else
-                        {
-                            boolean d1 = e.agentRow == 5 && e.agentCol == 1;
-                            boolean d2 = e.agentRow == 5 && e.agentCol == 3;
-                            boolean d3 = e.agentRow == 2 && e.agentCol == 5;
-                            processLocation = !(d1 || d2 || d3);
-                        }
-                        
-                        if(!processLocation){
-                            try {
-                                Thread.sleep(100);
-                                qTableGUI.setSpecialLocations(e.agentRow, e.agentCol, e.hasBlock);
-                                Thread.sleep(100);
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-                        
-                        return processLocation;
-                    })
-                    .sorted((qe1, qe2) -> qe1.compareByCol(qe2))
-                    .sorted((qe1, qe2) -> qe1.compareByRow(qe2))
-	            .forEach((e) -> {
-	                double[] vals = qtable.get(e);
-	                try {
-                            Thread.sleep(100);
-                            qTableGUI.setLocationValues(e.agentRow, e.agentCol, vals[0], vals[3], vals[1], vals[2], e.hasBlock);
-	                    Thread.sleep(100);
-	                } catch (InterruptedException ex) {
-	                    Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-	                }
-	            });
-            
-        }
-        
+	public void showQTableGUI(int experimentNumber, int finalIterations) {
+		qTableGUI.setQTableMetaData(experimentNumber, alpha, gamma, currentState, finalIterations, randomChance);
+		qTableGUI.setLocationRelativeTo(null);
+		qTableGUI.setVisible(true);
+
+		List<State> entries = new ArrayList<>(qtable.keySet());
+		entries.stream().filter((e) -> {
+			boolean processLocation = false;
+
+			if (e.hasBlock == 0) {
+				boolean p1 = e.agentRow == 1 && e.agentCol == 1;
+				boolean p2 = e.agentRow == 3 && e.agentCol == 3;
+				boolean p3 = e.agentRow == 5 && e.agentCol == 5;
+				processLocation = !(p1 || p2 || p3);
+			} else {
+				boolean d1 = e.agentRow == 5 && e.agentCol == 1;
+				boolean d2 = e.agentRow == 5 && e.agentCol == 3;
+				boolean d3 = e.agentRow == 2 && e.agentCol == 5;
+				processLocation = !(d1 || d2 || d3);
+			}
+
+			if (!processLocation) {
+				try {
+					Thread.sleep(100);
+					qTableGUI.setSpecialLocations(e.agentRow, e.agentCol, e.hasBlock);
+					Thread.sleep(100);
+				} catch (InterruptedException ex) {
+					Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+
+			return processLocation;
+		}).sorted((qe1, qe2) -> qe1.compareByCol(qe2)).sorted((qe1, qe2) -> qe1.compareByRow(qe2)).forEach((e) -> {
+			double[] vals = qtable.get(e);
+			try {
+				Thread.sleep(100);
+				qTableGUI.setLocationValues(e.agentRow, e.agentCol, vals[0], vals[3], vals[1], vals[2], e.hasBlock);
+				Thread.sleep(100);
+			} catch (InterruptedException ex) {
+				Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		});
+
+	}
+
 	public void printQTable(int i) {
 		currentState.printFullState();
 		System.out.printf("Iteration: %d\n", i);
@@ -488,7 +482,8 @@ public class Simulation {
 				|| (currentState.d1 != 5 && currentState.d2 == 5 && currentState.d3 == 5);
 	}
 
-	public static void PrintExperiment(Simulation sim, int i, BiPredicate<Simulation, Integer> pred, BiConsumer<Simulation, Integer> cons) {
+	public static void PrintExperiment(Simulation sim, int i, BiPredicate<Simulation, Integer> pred,
+			BiConsumer<Simulation, Integer> cons) {
 		if (pred.test(sim, i))
 			cons.accept(sim, i);
 	}
@@ -512,10 +507,10 @@ public class Simulation {
 
 		System.out.println("STEPS TAKEN FIRST RUN " + sim.simulate(iterations, pred, cons) + "\n");
 		sim.resetFullState();
-                int finalIterations = sim.simulate(iterations, pred, cons);
+		int finalIterations = sim.simulate(iterations, pred, cons);
 		System.out.println("STEPS TAKEN SECOND RUN " + finalIterations + "\n");
 		sim.saveAndCloseOutputFile();
-                sim.showQTableGUI(1, finalIterations);
+		sim.showQTableGUI(1, finalIterations);
 	}
 
 	public static void RunExperiment2(int iterations) {
@@ -553,7 +548,7 @@ public class Simulation {
 
 		System.out.println("STEPS TAKEN SECOND RUN " + totalSteps);
 		sim.saveAndCloseOutputFile();
-                sim.showQTableGUI(2, totalSteps);
+		sim.showQTableGUI(2, totalSteps);
 	}
 
 	public static void RunExperiment3(int iterations) {
@@ -562,9 +557,10 @@ public class Simulation {
 		BiConsumer<Simulation, Integer> cons = (s, i) -> s.printQTable(i);
 		BiPredicate<Simulation, Integer> pred = (s, i) -> {
 			boolean everyHundred = i != 0 && i % 100 == 0;
-			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be Exploit 2 for i == 100
+			if (i == 99) // i starts at 0 so i == 99 is the 100th, needs to be
+							// Exploit 2 for i == 100
 				s.randomChance = 0.1; // Change it to Exploit 2
-			 
+
 			return everyHundred || s.currentState.isGoalState();
 		};
 
@@ -573,10 +569,10 @@ public class Simulation {
 		sim.resetFullState();
 
 		sim.setRandomChance(1.0);
-                int totalSteps = (sim.simulate(iterations, pred, cons));
+		int totalSteps = (sim.simulate(iterations, pred, cons));
 		System.out.println("STEPS TAKEN SECOND RUN " + totalSteps);
 		sim.saveAndCloseOutputFile();
-                sim.showQTableGUI(3, totalSteps);
+		sim.showQTableGUI(3, totalSteps);
 	}
 
 	public static void RunExperiment4(int iterations) {
@@ -599,10 +595,10 @@ public class Simulation {
 		sim.resetFullState();
 
 		sim.setRandomChance(1.0);
-                int totalSteps = (sim.simulate(iterations, pred, cons));
+		int totalSteps = (sim.simulate(iterations, pred, cons));
 		System.out.println("STEPS TAKEN SECOND RUN " + totalSteps);
 		sim.saveAndCloseOutputFile();
-                sim.showQTableGUI(4, totalSteps);
+		sim.showQTableGUI(4, totalSteps);
 	}
 
 	public static void RunExperiment5(int iterations) {
@@ -630,14 +626,14 @@ public class Simulation {
 		sim.resetFullState();
 		sim.setRandomChance(1.0);
 		System.out.println("STEPS TAKEN SECOND RUN " + (sim.simulate(iterations, pred, cons)));
-		
+
 		sim.resetFullState();
 		sim.setRandomChance(1.0);
 		sim.switchPickUpDropLocations();
-                int totalSteps = (sim.simulate(iterations, pred, cons));
+		int totalSteps = (sim.simulate(iterations, pred, cons));
 		System.out.println("STEPS TAKEN THIRD RUN " + totalSteps);
 		sim.saveAndCloseOutputFile();
-                sim.showQTableGUI(5, totalSteps);
+		sim.showQTableGUI(5, totalSteps);
 	}
 
 	public static void RunExperiment6(int iterations) {
@@ -665,21 +661,21 @@ public class Simulation {
 		sim.p3c = 5;
 
 		sim.setRandomChance(1.0);
-                int totalSteps = (sim.simulate(iterations, pred, cons));
+		int totalSteps = (sim.simulate(iterations, pred, cons));
 		System.out.println("STEPS TAKEN SECOND RUN " + totalSteps);
 		sim.saveAndCloseOutputFile();
-                sim.showQTableGUI(6, totalSteps);
+		sim.showQTableGUI(6, totalSteps);
 	}
 
 	public static void main(String[] args) {
 		int iterations = 10000;
-//		RunExperiment1(iterations);
-//		RunExperiment2(iterations);
-		RunExperiment3(iterations); 
-//		RunExperiment4(iterations);
-//		RunExperiment5(iterations); 
-//		RunExperiment6(iterations);
-		
+		RunExperiment1(iterations);
+		RunExperiment2(iterations);
+		RunExperiment3(iterations);
+		RunExperiment4(iterations);
+		RunExperiment5(iterations);
+		RunExperiment6(iterations);
+
 		JOptionPane.showMessageDialog(null, "Experiments complete.\nSee output files.");
 	}
 }
