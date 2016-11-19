@@ -29,6 +29,17 @@ import javax.swing.KeyStroke;
  */
 public class QTableGUI extends javax.swing.JFrame {
 
+    enum Direction
+    {
+        North, NorthWest, NorthEast,
+        West,
+        South, SouthWest, SouthEast,
+        East,
+        None
+    }
+    
+    
+    
     /**
      * Creates new form NewJFrame
      */
@@ -145,11 +156,62 @@ public class QTableGUI extends javax.swing.JFrame {
         g1.drawLine(jpWidth, 0, 0, jpHeight);
     }
     
-    void drawPolygons(JPanel jp, float n, float w, float s, float e)
+    void drawSpecialLocations(JPanel jp)
+    {   
+        Graphics g = jp.getGraphics();
+        int jpHeight = jp.getHeight();
+        int jpWidth = jp.getWidth();
+        
+        int left = 5;
+        int right = jpWidth - 5;
+        int up = jpHeight - 5;
+        int down = 5;
+        
+        int [ ] x0 = {left, left, right, right}; 
+        int [ ] y0 = {down, up, up, down}; 
+        g.setColor(Color.GRAY);
+        g.fillPolygon(x0, y0, 4);
+        
+        g.setColor(Color.white);
+        g.drawString("1.0", (jpWidth / 2) - 10, jpHeight / 2);
+        
+        g.dispose();
+    }
+    
+    void drawPolygons(JPanel jp, float n, float w, float s, float e, Direction d)
     {
-    	float max = Math.max(n, Math.max(w, Math.max(s, e)));
-    	
-        System.out.printf("Max value %f of -> %f, %f, %f, %f\n", max, n, w, s, e);
+        float max = 0.f;
+        
+        switch(d)
+        {
+            case North:
+                max = Math.max(w, Math.max(s, e));
+                break;
+            case NorthWest:
+                max = Math.max(s, e);
+                break;
+            case NorthEast:
+                max = Math.max(s, w);
+                break;
+            case West:
+                max = Math.max(n,Math.max(s, e));
+                break;
+            case South:
+                max = Math.max(n, Math.max(w, e));
+                break;
+            case SouthWest:
+                max = Math.max(n, e);
+                break;
+            case SouthEast:
+                max = Math.max(n, w);
+                break;
+            case East:
+                max = Math.max(n, Math.max(w, s));
+                break;
+            case None:
+                max = Math.max(n, Math.max(w, Math.max(s, e)));
+                break;
+        }
         
         Graphics g = jp.getGraphics();
         int jpHeight = jp.getHeight();
@@ -158,26 +220,38 @@ public class QTableGUI extends javax.swing.JFrame {
         // West
         int [ ] x0 = {0, jpWidth / 2, 0}; 
         int [ ] y0 = {0, jpHeight / 2, jpHeight}; 
-        g.setColor(max == w ? Color.red : Color.black);
+        if (d == Direction.West || d == Direction.NorthWest || d == Direction.SouthWest)
+            g.setColor(Color.black);
+        else 
+            g.setColor(max == w ? Color.red : Color.black);
         g.fillPolygon(x0, y0, 3);
         
         // South
         int [ ] x1 = {0, jpWidth / 2, jpWidth}; 
         int [ ] y1 = {jpHeight, jpHeight / 2, jpHeight}; 
-        g.setColor(max == s ? Color.red : Color.black);
+        if (d == Direction.South || d == Direction.SouthEast || d == Direction.SouthWest)
+            g.setColor(Color.black);
+        else 
+            g.setColor(max == s ? Color.red : Color.black);
         g.fillPolygon(x1, y1, 3);
         
         // East
         int [ ] x2 = {jpWidth, jpWidth / 2, jpWidth}; 
         int [ ] y2 = {0, jpHeight / 2, jpHeight}; 
-        g.setColor(max == e ? Color.red : Color.black);
+        if (d == Direction.East || d == Direction.NorthEast || d == Direction.SouthEast)
+            g.setColor(Color.black);
+        else 
+            g.setColor(max == e ? Color.red : Color.black);
         g.fillPolygon(x2, y2, 3);
         
         
         // North
         int [ ] x3 = {0, jpWidth / 2, jpWidth}; 
         int [ ] y3 = {0, jpHeight / 2, 0}; 
-        g.setColor(max == n ? Color.red : Color.black);
+        if (d == Direction.North || d == Direction.NorthEast || d == Direction.NorthWest)
+            g.setColor(Color.black);
+        else 
+            g.setColor(max == n ? Color.red : Color.black);
         g.fillPolygon(x3, y3, 3);
         
         g.setColor(Color.white);
@@ -192,16 +266,46 @@ public class QTableGUI extends javax.swing.JFrame {
     
     void drawTable()
     {
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 5; j++) {
-                drawPolygons(jPanels[i][j], 0.5f, 0.6f, 0.7f, 0.1f);
+        for (int i = 1; i <= 5; i++) {
+            for (int j = 1; j <= 5; j++) {
+                
+                Direction d = Direction.None;
+                if(i == 1 && j == 1) d = Direction.NorthWest;
+                else if(i == 1 && j == 5) d = Direction.NorthEast;
+                else if(i == 5 && j == 1) d = Direction.SouthWest;
+                else if(i == 5 && j == 5) d = Direction.SouthEast;
+                else if(i == 1 && j != 1 && j != 5) d = Direction.North;
+                else if(i == 5 && j != 1 && j != 5) d = Direction.South;
+                else if(j == 1 && i != 1 && i != 5) d = Direction.West;
+                else if(j == 5 && i != 1 && i != 5) d = Direction.East;
+                
+                System.out.println("i = " + i + "; j = " + j + "; direction -> " + d.toString());
+                
+                drawPolygons(jPanels[i-1][j-1], 1.0f, 2.0f, 5.0f, 4.0f, d);
             }
         }   
     }
     
     public void setLocationValues (int i, int j, double north, double west, double south, double east)
     {   
-        drawPolygons(jPanels[i-1][j-1], (float)north,(float)west,(float)south,(float)east);
+        Direction d = Direction.None;
+        if(i == 1 && j == 1) d = Direction.NorthWest;
+        else if(i == 1 && j == 5) d = Direction.NorthEast;
+        else if(i == 5 && j == 1) d = Direction.SouthWest;
+        else if(i == 5 && j == 5) d = Direction.SouthEast;
+        else if(i == 1 && j != 1 && j != 5) d = Direction.North;
+        else if(i == 5 && j != 1 && j != 5) d = Direction.South;
+        else if(j == 1 && i != 1 && i != 5) d = Direction.West;
+        else if(j == 5 && i != 1 && i != 5) d = Direction.East;
+
+        System.out.println("i = " + i + "; j = " + j + "; ignore -> " + d.toString());
+
+        drawPolygons(jPanels[i-1][j-1], (float)north,(float)west,(float)south,(float)east, d);
+    }
+    
+    public void setSpecialLocations(int i, int j)
+    {
+        drawSpecialLocations(jPanels[i-1][j-1]);
     }
     
     /**
@@ -643,7 +747,7 @@ public class QTableGUI extends javax.swing.JFrame {
                                     .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE))))
+                                .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, 480, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -690,7 +794,7 @@ public class QTableGUI extends javax.swing.JFrame {
                                     .addComponent(jPanel20, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jPanel25, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                         .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap(121, Short.MAX_VALUE))
+                .addContainerGap(353, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -741,7 +845,7 @@ public class QTableGUI extends javax.swing.JFrame {
                     .addComponent(jPanel22, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel21, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel25, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(218, Short.MAX_VALUE))
+                .addContainerGap(83, Short.MAX_VALUE))
         );
 
         pack();
@@ -751,9 +855,9 @@ public class QTableGUI extends javax.swing.JFrame {
         //drawTable();
     }//GEN-LAST:event_formWindowOpened
 
-//    /**
-//     * @param args the command line arguments
-//     */
+    /**
+     * @param args the command line arguments
+     */
 //    public static void main(String args[]) {
 //        /* Set the Nimbus look and feel */
 //        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">

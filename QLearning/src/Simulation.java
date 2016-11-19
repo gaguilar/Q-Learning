@@ -306,6 +306,16 @@ public class Simulation {
                             processLocation = !(d1 || d2 || d3);
                         }
                         
+                        if(!processLocation){
+                            try {
+                                Thread.sleep(200);
+                                qTableGUI.setSpecialLocations(e.agentRow, e.agentCol);
+                                Thread.sleep(200);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                        
                         return requiredQTable && processLocation;
                     })
                     .sorted((qe1, qe2) -> qe1.compareByCol(qe2))
@@ -658,7 +668,7 @@ public class Simulation {
                 int totalSteps = (sim.simulate(iterations, pred, cons));
 		System.out.println("STEPS TAKEN SECOND RUN " + totalSteps);
 		sim.saveAndCloseOutputFile();
-                sim.showQTableGUI(6, totalSteps,1);
+                sim.showQTableGUI(6, totalSteps, 1);
 	}
 
 	public static void main(String[] args) {
