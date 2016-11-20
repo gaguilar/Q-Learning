@@ -282,51 +282,62 @@ public class Simulation {
 		}
 	}
 
-	public void showQTableGUI(int experimentNumber, int finalIterations) {
-		qTableGUI.setQTableMetaData(experimentNumber, alpha, gamma, currentState, finalIterations, randomChance);
-		qTableGUI.setLocationRelativeTo(null);
-		qTableGUI.setVisible(true);
-
-		List<State> entries = new ArrayList<>(qtable.keySet());
-		entries.stream().filter((e) -> {
-			boolean processLocation = false;
-
-			if (e.hasBlock == 0) {
-				boolean p1 = e.agentRow == 1 && e.agentCol == 1;
-				boolean p2 = e.agentRow == 3 && e.agentCol == 3;
-				boolean p3 = e.agentRow == 5 && e.agentCol == 5;
-				processLocation = !(p1 || p2 || p3);
-			} else {
-				boolean d1 = e.agentRow == 5 && e.agentCol == 1;
-				boolean d2 = e.agentRow == 5 && e.agentCol == 3;
-				boolean d3 = e.agentRow == 2 && e.agentCol == 5;
-				processLocation = !(d1 || d2 || d3);
-			}
-
-			if (!processLocation) {
-				try {
-					Thread.sleep(100);
-					qTableGUI.setSpecialLocations(e.agentRow, e.agentCol, e.hasBlock);
-					Thread.sleep(100);
-				} catch (InterruptedException ex) {
-					Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}
-
-			return processLocation;
-		}).sorted((qe1, qe2) -> qe1.compareByCol(qe2)).sorted((qe1, qe2) -> qe1.compareByRow(qe2)).forEach((e) -> {
-			double[] vals = qtable.get(e);
-			try {
-				Thread.sleep(100);
-				qTableGUI.setLocationValues(e.agentRow, e.agentCol, vals[0], vals[3], vals[1], vals[2], e.hasBlock);
-				Thread.sleep(100);
-			} catch (InterruptedException ex) {
-				Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-			}
-		});
-
-	}
-
+        public boolean canProcessLocation(State e)
+        {
+            if(e.hasBlock == 0)
+            {
+                boolean p1 = e.agentRow == p1r && e.agentCol == p1c;
+                boolean p2 = e.agentRow == p2r && e.agentCol == p2c;
+                boolean p3 = e.agentRow == p3r && e.agentCol == p3c;
+                return !(p1 || p2 || p3);
+            }
+            else
+            {
+                boolean d1 = e.agentRow == d1r && e.agentCol == d1c;
+                boolean d2 = e.agentRow == d2r && e.agentCol == d2c;
+                boolean d3 = e.agentRow == d3r && e.agentCol == d3c;
+                return !(d1 || d2 || d3);
+            }
+        }
+        
+        public void showQTableGUI(int experimentNumber, int finalIterations)
+        {
+            qTableGUI.setQTableMetaData(experimentNumber, alpha, gamma, currentState, finalIterations, randomChance);
+            qTableGUI.setLocationRelativeTo(null);
+            qTableGUI.setVisible(true);
+            
+            List<State> entries = new ArrayList<>(qtable.keySet());
+            entries.stream()
+                    .filter((e) -> {
+                        boolean processLocation = canProcessLocation(e);
+                        if(!processLocation){
+                            try {
+                                Thread.sleep(100);
+                                qTableGUI.setSpecialLocations(e.agentRow, e.agentCol, e.hasBlock);
+                                Thread.sleep(100);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                        
+                        return processLocation;
+                    })
+                    .sorted((qe1, qe2) -> qe1.compareByCol(qe2))
+                    .sorted((qe1, qe2) -> qe1.compareByRow(qe2))
+	            .forEach((e) -> {
+	                double[] vals = qtable.get(e);
+	                try {
+                            Thread.sleep(100);
+                            qTableGUI.setLocationValues(e.agentRow, e.agentCol, vals[0], vals[3], vals[1], vals[2], e.hasBlock);
+	                    Thread.sleep(100);
+	                } catch (InterruptedException ex) {
+	                    Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+	                }
+	            });
+            System.out.printf("Pickup -> (%d,%d) - (%d,%d) - (%d,%d)\n", p1r, p1c, p2r, p2c, p3r, p3c);
+            System.out.printf("Dropoff -> (%d,%d) - (%d,%d) - (%d,%d)\n", d1r, d1c, d2r, d2c, d3r, d3c);
+        }
+        
 	public void printQTable(int i) {
 		currentState.printFullState();
 		System.out.printf("Iteration: %d\n", i);

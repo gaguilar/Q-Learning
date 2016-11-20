@@ -199,7 +199,7 @@ public class QTableGUI extends javax.swing.JFrame {
         g.fillPolygon(x0, y0, 4);
         
         g.setColor(Color.white);
-        g.drawString("1.0", (jpWidth / 2) - 10, jpHeight / 2);
+        g.drawString("13.0", (jpWidth / 2) - 10, jpHeight / 2);
         
         g.dispose();
     }
